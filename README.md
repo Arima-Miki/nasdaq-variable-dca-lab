@@ -23,8 +23,11 @@ strategies** for NASDAQ-100-related investments.
 | -------- | ---- |
 | [docs/experiment_spec.md](docs/experiment_spec.md) | The normative Frozen Phase 0 Baseline specification — strategy rules, budget accounting, metrics, and open Phase-1 / methodology requirements |
 | [docs/decisions/phase0_baseline_decisions.md](docs/decisions/phase0_baseline_decisions.md) | Decision history: why Owner Decisions OD-01 through OD-14 were selected |
+| [docs/evidence/phase1_empirical_alignment_study.md](docs/evidence/phase1_empirical_alignment_study.md) | Phase-1 Evidence Artifact: observation-time alignment between the Nissay fund NAV and the Nasdaq JPY candidate series (Owner-approved evidence; **no Primary Proxy approved**) |
 
-Where the two differ, the specification governs Baseline behavior.
+Where the specification and the decision history differ, the specification governs
+Baseline behavior. Evidence artifacts record Phase-1 findings; they do not modify the
+Baseline.
 
 ---
 
@@ -129,11 +132,15 @@ Phase 1 investigates, from evidence rather than assumption:
 - cost and expense treatment, without double-counting or assumed tracking
   difference
 
+Phase 1 has begun producing evidence. Approved findings are recorded as evidence
+artifacts under [docs/evidence/](docs/evidence/); the artifact is authoritative for its
+study, and this README is not a research-results document.
+
 **Phase 2 implementation remains blocked** until the Phase-1 evidence
 requirements recorded in
 [docs/experiment_spec.md](docs/experiment_spec.md#19-open-items-register) are
 resolved. No backtest code, methodology code, or data loader is written before
-then.
+then. In particular, **no Primary Proxy has been approved** — P1-2 remains open.
 
 ## Repository boundary
 
