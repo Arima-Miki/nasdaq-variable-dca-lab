@@ -27,6 +27,7 @@ strategies** for NASDAQ-100-related investments.
 | [docs/evidence/phase1_fx_source_research.md](docs/evidence/phase1_fx_source_research.md) | Phase-1 Evidence Artifact: availability, observation timing, and licensing of candidate USD/JPY FX sources (Owner-approved evidence; **no FX source approved**) |
 | [docs/evidence/phase1_japan_side_ttm_qualification.md](docs/evidence/phase1_japan_side_ttm_qualification.md) | Phase-1 Evidence Artifact: qualification of a Japanese-bank USD/JPY TTM series as a candidate Japan-side FX approximation (Owner-approved evidence) |
 | [docs/decisions/phase1_ttm_qualification_decision.md](docs/decisions/phase1_ttm_qualification_decision.md) | Phase-1 Owner Decision: bounded qualification of MUFG/MURC TTM as a Phase-1 research input. **Not a Phase-0 Baseline change** |
+| [docs/decisions/phase1_fx_residual_decomposition_study_decision.md](docs/decisions/phase1_fx_residual_decomposition_study_decision.md) | Phase-1 Owner Decision: authorization, scope limits, and staged execution boundaries for the FX Residual Decomposition Study. Owner authorization only — **no study results**. **Not a Phase-0 Baseline change** |
 
 Where the specification and the decision history differ, the specification governs
 Baseline behavior. Evidence artifacts record Phase-1 findings; they do not modify the
@@ -140,7 +141,9 @@ under [docs/evidence/](docs/evidence/); **several Phase-1 Evidence Artifacts now
 exist**, each authoritative for its own study, and this README is not a
 research-results document.
 
-One Phase-1 Owner Decision has been recorded
+Two Phase-1 Owner Decisions have been recorded.
+
+The first
 ([docs/decisions/phase1_ttm_qualification_decision.md](docs/decisions/phase1_ttm_qualification_decision.md)):
 MUFG/MURC historical USD/JPY TTM is **qualified only as a bounded Phase-1
 research input** — a candidate approximation of the fund's Japan-side FX
@@ -149,6 +152,16 @@ qualification does **not** identify any bank as the fund's FX provider, does
 **not** approve a Baseline FX convention, and does **not** permit raw FX data to
 be committed to this repository. It is a Phase-1 research authorization, not a
 change to the Frozen Phase-0 Baseline.
+
+The second
+([docs/decisions/phase1_fx_residual_decomposition_study_decision.md](docs/decisions/phase1_fx_residual_decomposition_study_decision.md)):
+the **FX Residual Decomposition Study** is authorized, with scope limits, to
+investigate how much of the observed fund-vs-candidate residual is attributable
+to FX observation convention. That artifact records **Owner authorization only
+and contains no study results**. It approves one bounded return-space research
+construct, keeps raw data outside this repository, and leaves publication of any
+derived statistics to a separate later review. It approves no Primary Proxy, no
+Baseline FX convention, and no change to the Frozen Phase-0 Baseline.
 
 **Phase 2 implementation remains blocked** until the Phase-1 evidence
 requirements recorded in
