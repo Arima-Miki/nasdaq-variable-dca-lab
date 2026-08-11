@@ -24,6 +24,9 @@ strategies** for NASDAQ-100-related investments.
 | [docs/experiment_spec.md](docs/experiment_spec.md) | The normative Frozen Phase 0 Baseline specification — strategy rules, budget accounting, metrics, and open Phase-1 / methodology requirements |
 | [docs/decisions/phase0_baseline_decisions.md](docs/decisions/phase0_baseline_decisions.md) | Decision history: why Owner Decisions OD-01 through OD-14 were selected |
 | [docs/evidence/phase1_empirical_alignment_study.md](docs/evidence/phase1_empirical_alignment_study.md) | Phase-1 Evidence Artifact: observation-time alignment between the Nissay fund NAV and the Nasdaq JPY candidate series (Owner-approved evidence; **no Primary Proxy approved**) |
+| [docs/evidence/phase1_fx_source_research.md](docs/evidence/phase1_fx_source_research.md) | Phase-1 Evidence Artifact: availability, observation timing, and licensing of candidate USD/JPY FX sources (Owner-approved evidence; **no FX source approved**) |
+| [docs/evidence/phase1_japan_side_ttm_qualification.md](docs/evidence/phase1_japan_side_ttm_qualification.md) | Phase-1 Evidence Artifact: qualification of a Japanese-bank USD/JPY TTM series as a candidate Japan-side FX approximation (Owner-approved evidence) |
+| [docs/decisions/phase1_ttm_qualification_decision.md](docs/decisions/phase1_ttm_qualification_decision.md) | Phase-1 Owner Decision: bounded qualification of MUFG/MURC TTM as a Phase-1 research input. **Not a Phase-0 Baseline change** |
 
 Where the specification and the decision history differ, the specification governs
 Baseline behavior. Evidence artifacts record Phase-1 findings; they do not modify the
@@ -132,9 +135,20 @@ Phase 1 investigates, from evidence rather than assumption:
 - cost and expense treatment, without double-counting or assumed tracking
   difference
 
-Phase 1 has begun producing evidence. Approved findings are recorded as evidence
-artifacts under [docs/evidence/](docs/evidence/); the artifact is authoritative for its
-study, and this README is not a research-results document.
+Phase 1 is **in progress**. Approved findings are recorded as evidence artifacts
+under [docs/evidence/](docs/evidence/); **several Phase-1 Evidence Artifacts now
+exist**, each authoritative for its own study, and this README is not a
+research-results document.
+
+One Phase-1 Owner Decision has been recorded
+([docs/decisions/phase1_ttm_qualification_decision.md](docs/decisions/phase1_ttm_qualification_decision.md)):
+MUFG/MURC historical USD/JPY TTM is **qualified only as a bounded Phase-1
+research input** — a candidate approximation of the fund's Japan-side FX
+conversion concept, for local research and sensitivity analysis. That
+qualification does **not** identify any bank as the fund's FX provider, does
+**not** approve a Baseline FX convention, and does **not** permit raw FX data to
+be committed to this repository. It is a Phase-1 research authorization, not a
+change to the Frozen Phase-0 Baseline.
 
 **Phase 2 implementation remains blocked** until the Phase-1 evidence
 requirements recorded in
