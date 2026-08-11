@@ -28,6 +28,7 @@ strategies** for NASDAQ-100-related investments.
 | [docs/evidence/phase1_japan_side_ttm_qualification.md](docs/evidence/phase1_japan_side_ttm_qualification.md) | Phase-1 Evidence Artifact: qualification of a Japanese-bank USD/JPY TTM series as a candidate Japan-side FX approximation (Owner-approved evidence) |
 | [docs/decisions/phase1_ttm_qualification_decision.md](docs/decisions/phase1_ttm_qualification_decision.md) | Phase-1 Owner Decision: bounded qualification of MUFG/MURC TTM as a Phase-1 research input. **Not a Phase-0 Baseline change** |
 | [docs/decisions/phase1_fx_residual_decomposition_study_decision.md](docs/decisions/phase1_fx_residual_decomposition_study_decision.md) | Phase-1 Owner Decision: authorization, scope limits, and staged execution boundaries for the FX Residual Decomposition Study. Owner authorization only — **no study results**. **Not a Phase-0 Baseline change** |
+| [docs/evidence/phase1_fx_residual_decomposition_study.md](docs/evidence/phase1_fx_residual_decomposition_study.md) | Phase-1 Evidence Artifact: results of the FX Residual Decomposition Study — qualitative findings only, with detailed numerical results deliberately unpublished (Owner-approved evidence; **no Primary Proxy approved**) |
 
 Where the specification and the decision history differ, the specification governs
 Baseline behavior. Evidence artifacts record Phase-1 findings; they do not modify the
@@ -162,6 +163,20 @@ and contains no study results**. It approves one bounded return-space research
 construct, keeps raw data outside this repository, and leaves publication of any
 derived statistics to a separate later review. It approves no Primary Proxy, no
 Baseline FX convention, and no change to the Frozen Phase-0 Baseline.
+
+That study has since been **completed and recorded** as a Phase-1 Evidence Artifact
+([docs/evidence/phase1_fx_residual_decomposition_study.md](docs/evidence/phase1_fx_residual_decomposition_study.md)).
+At a high level, it found that **FX observation convention is a first-order empirical
+contributor** to the residual between the fund and the JPY candidate series — **under the
+qualified research approximations used**, not under any identified production convention. The
+**actual production FX conventions on either side remain unidentified**, and a structured
+residual remains after the FX component is accounted for.
+
+**Detailed numerical results and source-derived data are not published** where the applicable
+publication and licensing boundary does not support doing so. That omission is deliberate, and
+the artifact states what was withheld and why. The artifact approves **no Primary Proxy**, no
+Baseline FX convention, and no change to the Frozen Phase-0 Baseline. This README remains an
+entry document, not a research-results document; the artifact is authoritative for its own study.
 
 **Phase 2 implementation remains blocked** until the Phase-1 evidence
 requirements recorded in
