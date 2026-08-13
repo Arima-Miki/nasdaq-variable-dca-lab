@@ -1,0 +1,140 @@
+{
+  "classification": [
+    "NON-FORMAL — SIMULATION TRIAL",
+    "ENGINE VALIDATION FIXTURE",
+    "SYNTHETIC",
+    "NON-MARKET DATA",
+    "NON-ECONOMIC",
+    "NON-BASELINE",
+    "NON-PROMOTABLE"
+  ],
+  "warning": "SYNTHETIC NON-MARKET DATA. Invented for engine validation. Not an observation of any index, fund or security. MUST NEVER be represented as market evidence.",
+  "governing_baseline": "v2",
+  "dataset_class": "synthetic",
+  "fixture_id": "S11",
+  "scenario_name": "Performance start after 1 January",
+  "exposes": "OD-14 full 12.0 units, no proration",
+  "parameters": {
+    "unit_value_jpy": "10000",
+    "annual_units": "12.0",
+    "threshold_normal": "-0.10",
+    "threshold_large_drop": "-0.20",
+    "units_normal_zone": "1.0",
+    "units_large_drop_zone": "2.0",
+    "units_strategy_a_monthly": "1.0",
+    "units_month_end_fallback": "0.5",
+    "execution_valuation_rule": "NEXT_OBSERVATION_CLOSE",
+    "execution_valuation_rule_note": "Declared FIXTURE PARAMETER, not a Baseline execution-price determination. P1-1/OD-04 untouched. Satisfies OD-03.",
+    "performance_start": "2021-06-15"
+  },
+  "observations": [
+    {
+      "date": "2021-06-15",
+      "close": "100"
+    },
+    {
+      "date": "2021-06-16",
+      "close": "85"
+    },
+    {
+      "date": "2021-06-17",
+      "close": "100"
+    },
+    {
+      "date": "2021-06-30",
+      "close": "100"
+    }
+  ],
+  "hand_derived_expectations": {
+    "note": "Expectations derived by an INDEPENDENT reference derivation written separately from the engine, at the SAME declared decimal precision (40) the engine uses, BEFORE comparison. Engine output was never copied into these expectations. Short fixtures are additionally hand-checkable. CORRECTION recorded openly: the first derivation ran at Python's default precision 28, so non-terminating values (e.g. 10000/130) rounded differently from the engine's 40-digit context. The engine was NOT at fault; the derivation now declares the same precision.",
+    "per_strategy": {
+      "A": {
+        "allocations": [
+          {
+            "committed_on": "2021-06-30",
+            "attributed_month": "2021-06",
+            "attributed_budget_year": "2021",
+            "requested_units": "1.0",
+            "accepted_units": "1.0",
+            "capped": false
+          }
+        ],
+        "terminal_state": {
+          "reference_high": "100",
+          "final_dd": "0",
+          "final_zone": "HIGH",
+          "budget_units_granted": "12.0",
+          "budget_units_available": "11.0",
+          "budget_units_reserved_outstanding": "1.0",
+          "budget_units_executed": "0",
+          "cash_granted_jpy": "120000.0",
+          "cash_deployed_jpy": "0",
+          "cash_remaining_jpy": "120000.0",
+          "exposure_units_held": "0",
+          "allocations_committed": 1,
+          "signals_suppressed_monthly_exclusivity": 0
+        }
+      },
+      "B": {
+        "allocations": [
+          {
+            "committed_on": "2021-06-16",
+            "attributed_month": "2021-06",
+            "attributed_budget_year": "2021",
+            "requested_units": "1.0",
+            "accepted_units": "1.0",
+            "capped": false,
+            "executed_on": "2021-06-17",
+            "execution_close": "100",
+            "exposure_units_acquired": "100.0"
+          }
+        ],
+        "terminal_state": {
+          "reference_high": "100",
+          "final_dd": "0",
+          "final_zone": "HIGH",
+          "budget_units_granted": "12.0",
+          "budget_units_available": "11.0",
+          "budget_units_reserved_outstanding": "0.0",
+          "budget_units_executed": "1.0",
+          "cash_granted_jpy": "120000.0",
+          "cash_deployed_jpy": "10000.0",
+          "cash_remaining_jpy": "110000.0",
+          "exposure_units_held": "100.0",
+          "allocations_committed": 1,
+          "signals_suppressed_monthly_exclusivity": 0
+        }
+      },
+      "C": {
+        "allocations": [
+          {
+            "committed_on": "2021-06-16",
+            "attributed_month": "2021-06",
+            "attributed_budget_year": "2021",
+            "requested_units": "1.0",
+            "accepted_units": "1.0",
+            "capped": false,
+            "executed_on": "2021-06-17",
+            "execution_close": "100",
+            "exposure_units_acquired": "100.0"
+          }
+        ],
+        "terminal_state": {
+          "reference_high": "100",
+          "final_dd": "0",
+          "final_zone": "HIGH",
+          "budget_units_granted": "12.0",
+          "budget_units_available": "11.0",
+          "budget_units_reserved_outstanding": "0.0",
+          "budget_units_executed": "1.0",
+          "cash_granted_jpy": "120000.0",
+          "cash_deployed_jpy": "10000.0",
+          "cash_remaining_jpy": "110000.0",
+          "exposure_units_held": "100.0",
+          "allocations_committed": 1,
+          "signals_suppressed_monthly_exclusivity": 0
+        }
+      }
+    }
+  }
+}

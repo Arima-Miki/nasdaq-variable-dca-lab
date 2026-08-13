@@ -175,11 +175,20 @@ def main():
     expect_error("malformed date rejected", lambda b: b["observations"][1].update(date="2021-13-99"))
     expect_error("missing observations rejected", lambda b: b.__setitem__("observations", []))
     expect_error("bad unit_value rejected", lambda b: b["parameters"].update(unit_value_jpy="0"))
+    # E3 UPDATE: Strategy A is now implemented, so the original assertion that "A"
+    # is rejected became obsolete. The guard's INTENT — an unsupported strategy
+    # identifier must fail fast — is preserved by using a genuinely unsupported id.
     try:
-        Engine(fx("E2-M1"), strategy="A")
-        ok("unimplemented strategy rejected", False, "NO ERROR RAISED")
+        Engine(fx("E2-M1"), strategy="Z")
+        ok("unsupported strategy id rejected", False, "NO ERROR RAISED")
     except FixtureError as e:
-        ok("unimplemented strategy rejected", True, f"FixtureError: {e}")
+        ok("unsupported strategy id rejected", True, f"FixtureError: {e}")
+    for st in ("A", "B", "C"):
+        try:
+            Engine(fx("E2-M1"), strategy=st)
+            ok(f"strategy {st} accepted", True)
+        except FixtureError as e:
+            ok(f"strategy {st} accepted", False, str(e))
 
     print("\n" + "=" * 78); print("NO-METRIC-PATH GUARD (governance invariant)"); print("=" * 78)
     banned = ["cagr", "xirr", "total_return", "totalreturn", "tracking_error", "trackingerror",

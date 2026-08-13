@@ -1,0 +1,177 @@
+{
+  "classification": [
+    "NON-FORMAL — SIMULATION TRIAL",
+    "ENGINE VALIDATION FIXTURE",
+    "SYNTHETIC",
+    "NON-MARKET DATA",
+    "NON-ECONOMIC",
+    "NON-BASELINE",
+    "NON-PROMOTABLE"
+  ],
+  "warning": "SYNTHETIC NON-MARKET DATA. Invented for engine validation. Not an observation of any index, fund or security. MUST NEVER be represented as market evidence.",
+  "governing_baseline": "v2",
+  "dataset_class": "synthetic",
+  "fixture_id": "S1",
+  "scenario_name": "Monotonic rise",
+  "exposes": "ATH tracking; DD stays 0; B never buys; A month-end; C fallback",
+  "parameters": {
+    "unit_value_jpy": "10000",
+    "annual_units": "12.0",
+    "threshold_normal": "-0.10",
+    "threshold_large_drop": "-0.20",
+    "units_normal_zone": "1.0",
+    "units_large_drop_zone": "2.0",
+    "units_strategy_a_monthly": "1.0",
+    "units_month_end_fallback": "0.5",
+    "execution_valuation_rule": "NEXT_OBSERVATION_CLOSE",
+    "execution_valuation_rule_note": "Declared FIXTURE PARAMETER, not a Baseline execution-price determination. P1-1/OD-04 untouched. Satisfies OD-03.",
+    "performance_start": "2021-01-04"
+  },
+  "observations": [
+    {
+      "date": "2021-01-04",
+      "close": "100"
+    },
+    {
+      "date": "2021-01-05",
+      "close": "110"
+    },
+    {
+      "date": "2021-01-29",
+      "close": "120"
+    },
+    {
+      "date": "2021-02-01",
+      "close": "130"
+    },
+    {
+      "date": "2021-02-26",
+      "close": "140"
+    },
+    {
+      "date": "2021-03-01",
+      "close": "150"
+    }
+  ],
+  "hand_derived_expectations": {
+    "note": "Expectations derived by an INDEPENDENT reference derivation written separately from the engine, at the SAME declared decimal precision (40) the engine uses, BEFORE comparison. Engine output was never copied into these expectations. Short fixtures are additionally hand-checkable. CORRECTION recorded openly: the first derivation ran at Python's default precision 28, so non-terminating values (e.g. 10000/130) rounded differently from the engine's 40-digit context. The engine was NOT at fault; the derivation now declares the same precision.",
+    "per_strategy": {
+      "A": {
+        "allocations": [
+          {
+            "committed_on": "2021-01-29",
+            "attributed_month": "2021-01",
+            "attributed_budget_year": "2021",
+            "requested_units": "1.0",
+            "accepted_units": "1.0",
+            "capped": false,
+            "executed_on": "2021-02-01",
+            "execution_close": "130",
+            "exposure_units_acquired": "76.92307692307692307692307692307692307692"
+          },
+          {
+            "committed_on": "2021-02-26",
+            "attributed_month": "2021-02",
+            "attributed_budget_year": "2021",
+            "requested_units": "1.0",
+            "accepted_units": "1.0",
+            "capped": false,
+            "executed_on": "2021-03-01",
+            "execution_close": "150",
+            "exposure_units_acquired": "66.66666666666666666666666666666666666667"
+          },
+          {
+            "committed_on": "2021-03-01",
+            "attributed_month": "2021-03",
+            "attributed_budget_year": "2021",
+            "requested_units": "1.0",
+            "accepted_units": "1.0",
+            "capped": false
+          }
+        ],
+        "terminal_state": {
+          "reference_high": "150",
+          "final_dd": "0",
+          "final_zone": "HIGH",
+          "budget_units_granted": "12.0",
+          "budget_units_available": "9.0",
+          "budget_units_reserved_outstanding": "1.0",
+          "budget_units_executed": "2.0",
+          "cash_granted_jpy": "120000.0",
+          "cash_deployed_jpy": "20000.0",
+          "cash_remaining_jpy": "100000.0",
+          "exposure_units_held": "143.5897435897435897435897435897435897436",
+          "allocations_committed": 3,
+          "signals_suppressed_monthly_exclusivity": 0
+        }
+      },
+      "B": {
+        "allocations": [],
+        "terminal_state": {
+          "reference_high": "150",
+          "final_dd": "0",
+          "final_zone": "HIGH",
+          "budget_units_granted": "12.0",
+          "budget_units_available": "12.0",
+          "budget_units_reserved_outstanding": "0",
+          "budget_units_executed": "0",
+          "cash_granted_jpy": "120000.0",
+          "cash_deployed_jpy": "0",
+          "cash_remaining_jpy": "120000.0",
+          "exposure_units_held": "0",
+          "allocations_committed": 0,
+          "signals_suppressed_monthly_exclusivity": 0
+        }
+      },
+      "C": {
+        "allocations": [
+          {
+            "committed_on": "2021-01-29",
+            "attributed_month": "2021-01",
+            "attributed_budget_year": "2021",
+            "requested_units": "0.5",
+            "accepted_units": "0.5",
+            "capped": false,
+            "executed_on": "2021-02-01",
+            "execution_close": "130",
+            "exposure_units_acquired": "38.46153846153846153846153846153846153846"
+          },
+          {
+            "committed_on": "2021-02-26",
+            "attributed_month": "2021-02",
+            "attributed_budget_year": "2021",
+            "requested_units": "0.5",
+            "accepted_units": "0.5",
+            "capped": false,
+            "executed_on": "2021-03-01",
+            "execution_close": "150",
+            "exposure_units_acquired": "33.33333333333333333333333333333333333333"
+          },
+          {
+            "committed_on": "2021-03-01",
+            "attributed_month": "2021-03",
+            "attributed_budget_year": "2021",
+            "requested_units": "0.5",
+            "accepted_units": "0.5",
+            "capped": false
+          }
+        ],
+        "terminal_state": {
+          "reference_high": "150",
+          "final_dd": "0",
+          "final_zone": "HIGH",
+          "budget_units_granted": "12.0",
+          "budget_units_available": "10.5",
+          "budget_units_reserved_outstanding": "0.5",
+          "budget_units_executed": "1.0",
+          "cash_granted_jpy": "120000.0",
+          "cash_deployed_jpy": "10000.0",
+          "cash_remaining_jpy": "110000.0",
+          "exposure_units_held": "71.79487179487179487179487179487179487179",
+          "allocations_committed": 3,
+          "signals_suppressed_monthly_exclusivity": 0
+        }
+      }
+    }
+  }
+}

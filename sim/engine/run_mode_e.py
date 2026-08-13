@@ -28,7 +28,13 @@ def main(fixture_id="S3", strategy="B", run_id="E1-S3-B-001", run_date="2026-08-
     """run_id distinguishes E1 from E2 evidence; E1 outputs are never overwritten."""
     fx_path = REPO / "sim" / "fixtures" / f"{fixture_id}.json"
     fx = load(fx_path)
-    eng = Engine(fx).run()
+    # E3 DEFECT FIX (recorded openly). The first form of this line was
+    # `Engine(fx).run()`, which DISCARDED the `strategy` argument and always ran
+    # Strategy B while the manifest recorded whatever was requested. With only
+    # Strategy B implemented (E1/E2) it produced no wrong output, but the moment
+    # A and C became runnable it would have written Strategy-B engine state under
+    # a Strategy-A or Strategy-C label. Caught before any E3 evidence was written.
+    eng = Engine(fx, strategy=strategy).run()
 
     out = STORE / run_id
     out.mkdir(parents=True, exist_ok=True)
@@ -47,7 +53,11 @@ def main(fixture_id="S3", strategy="B", run_id="E1-S3-B-001", run_date="2026-08-
         "simulator_commit": git("rev-parse", "HEAD"),
         "simulator_worktree_clean": git("status", "--porcelain") == "",
         "strategy_rule_id": f"Strategy {strategy}",
-        "rule_status": "BASELINE RULE (frozen, Baseline v2 §4.2/§4.4)",
+        "rule_status": {
+            "A": "BASELINE RULE (frozen, Baseline v2 §4.1, OD-01)",
+            "B": "BASELINE RULE (frozen, Baseline v2 §4.2, OD-09)",
+            "C": "BASELINE RULE (frozen, Baseline v2 §4.3, OD-05)",
+        }[strategy],
         "dataset_id": fixture_id,
         "dataset_class": "synthetic",
         "dataset_sha256": sha256(fx_path),
@@ -65,11 +75,14 @@ def main(fixture_id="S3", strategy="B", run_id="E1-S3-B-001", run_date="2026-08-
             "NO evaluation metric governed by M-1..M-8: no TTEV, XIRR, CAGR, total or "
             "annualised return, tracking statistic, or any performance measure."
         ],
+        # E3: these were hardcoded to the E1 walking-skeleton situation. A manifest
+        # that understates its own coverage is as much an evidence defect as one
+        # that overstates it, so they are now derived from the actual run.
         "known_limitations": [
-            f"Strategy B only; fixture {fixture_id}.",
-            "Strategies A and C are not implemented in Mode E to date.",
-            "Invariants 3 and 14 are unreachable with a single strategy.",
-            "Scenarios S1/S2/S4-S11 of the approved suite are not implemented.",
+            f"Single run: Strategy {strategy}, fixture {fixture_id}. Engine state only.",
+            "Synthetic fixture. NOT market data. No economic or performance claim.",
+            "Invariant 18 is not reachable within a single-strategy run.",
+            "M-7 remains OPEN: exact Decimal arithmetic, no tolerance policy adopted.",
         ],
         "run_date": run_date,
     }

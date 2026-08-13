@@ -1,18 +1,45 @@
 #!/usr/bin/env python3
-"""Simulation Trial — Mode E (Engine Validation) walking skeleton.
+"""Simulation Trial — Mode E (Engine Validation).
 
 NON-FORMAL — SIMULATION TRIAL
 ENGINE VALIDATION — SYNTHETIC — NON-ECONOMIC — NON-BASELINE — NON-PROMOTABLE
 
 Governing Baseline: v2 (effective 2026-08-13).
 
-This engine implements ONLY the mechanics Phase E1 requires: fixture S3 with
-Strategy B. It reports ENGINE STATE, never performance. No evaluation metric
-governed by M-1..M-8 is computed here, and none may be added without a separate
-Owner Decision.
+Phases E1 (walking skeleton, S3/Strategy B), E2 (month/year boundary hardening)
+and E3 (Strategies A and C; S1-S11 synthetic suite) are implemented. This engine
+reports ENGINE STATE, never performance. No evaluation metric governed by
+M-1..M-8 is computed here, and none may be added without a separate Owner
+Decision.
 
 All arithmetic is exact Decimal. No floating-point tolerance policy is adopted;
 M-7 remains OPEN.
+
+OWNER-APPROVED 2026-08-13 — IMPLEMENTATION-EVOLUTION RULE
+---------------------------------------------------------
+The repository's additive-only preservation discipline REMAINS FULLY BINDING for
+normative and evidentiary artifacts unless a separate Owner Decision explicitly
+provides otherwise. However:
+
+  IMPLEMENTATION AND TEST CODE MAY EVOLVE UNDER CONTROLLED VERSION HISTORY.
+
+Covered: simulator implementation, test code, fixture-generation code, run
+drivers, implementation-support files. Such files MAY be modified after an
+earlier phase has been preserved when required to fix a defect, implement an
+already-authorized later phase, extend the engine to another authorized
+strategy, correct an obsolete implementation test, or preserve compatibility
+with the controlling Baseline.
+
+This does NOT authorize rewriting historical evidence. Requirements:
+  1. previous implementation state must remain recoverable from Git history;
+  2. preserved phase tags must not move;
+  3. earlier evidence artifacts and external run outputs must not be overwritten;
+  4. regressions for earlier phases must pass;
+  5. defects discovered during evolution must be recorded openly;
+  6. normative semantics must not be changed by implementation edits;
+  7. any genuine normative conflict returns to Owner Review.
+
+THIS APPROVAL DOES NOT GENERALIZE TO PRESERVED docs/ ARTIFACTS.
 """
 from decimal import Decimal, getcontext
 from datetime import date
@@ -43,12 +70,43 @@ def classify_zone(dd, t_normal, t_large):
     return HIGH
 
 
-def strategy_b(zone, units_normal, units_large):
-    """Baseline v2 §4.2 / §4.4 / OD-09. High zone -> WAIT / 0 units."""
+def daily_trigger(zone, units_normal, units_large):
+    """Daily Drawdown Trigger, shared by Strategies B and C — v2 §4.2/§4.3/§4.4,
+    OD-09. High zone -> no Daily Trigger."""
     if zone == LARGE_DROP:
         return units_large
     if zone == NORMAL:
         return units_normal
+    return Decimal("0")
+
+
+def requested_units(strategy, zone, is_month_end, month_already_committed,
+                    u_normal, u_large, u_dca, u_fallback):
+    """Returns the Purchase Request size before budget validation.
+
+    Strategy A — v2 §4.1 / OD-01: decision on the FINAL TRADING DAY of each
+    calendar month, 1.0 unit, drawdown is NOT an input.
+
+    Strategy B — v2 §4.2 / OD-09: Daily Trigger only; High zone -> WAIT / 0.
+
+    Strategy C — v2 §4.3 / OD-05, month-end processing order:
+      1. normal Daily Signal Evaluation;
+      2. if a Daily Trigger fires -> that request (1.0 or 2.0);
+      3. else, if no earlier Daily Trigger has committed this month's allocation
+         -> Month-End Fallback of 0.5 units, and ONLY where DD > -10% (HIGH).
+    At month-end with NORMAL or LARGE_DROP the Daily Trigger fires first, so the
+    fallback is never reached — matching the Baseline's stated consequence.
+    """
+    if strategy == "A":
+        return u_dca if is_month_end else Decimal("0")
+
+    daily = daily_trigger(zone, u_normal, u_large)
+    if daily != 0:
+        return daily
+
+    if strategy == "C" and is_month_end and not month_already_committed and zone == HIGH:
+        return u_fallback
+
     return Decimal("0")
 
 
@@ -111,12 +169,12 @@ def validate(fixture):
 
 
 class Engine:
-    SUPPORTED_STRATEGIES = ("B",)
+    SUPPORTED_STRATEGIES = ("A", "B", "C")
 
     def __init__(self, fixture, strategy="B"):
         if strategy not in self.SUPPORTED_STRATEGIES:
             raise FixtureError(
-                f"strategy '{strategy}' is not implemented in Mode E phase E2; "
+                f"strategy '{strategy}' is not implemented in Mode E; "
                 f"supported: {self.SUPPORTED_STRATEGIES}")
         validate(fixture)
         p = fixture["parameters"]
@@ -126,6 +184,9 @@ class Engine:
         self.t_large = Decimal(p["threshold_large_drop"])
         self.u_normal = Decimal(p["units_normal_zone"])
         self.u_large = Decimal(p["units_large_drop_zone"])
+        self.u_dca = Decimal(p.get("units_strategy_a_monthly", "1.0"))
+        self.u_fallback = Decimal(p.get("units_month_end_fallback", "0.5"))
+        self.strategy = strategy
         self.exec_rule = p["execution_valuation_rule"]
         self.perf_start = date.fromisoformat(p["performance_start"])
         self.obs = [(date.fromisoformat(o["date"]), Decimal(o["close"]))
@@ -194,6 +255,44 @@ class Engine:
                  available_after=self.available, prorated=False,
                  carry_forward_included=self.available - self.annual_units)
 
+    def is_final_observation_of_month(self, i):
+        """FINAL TRADING DAY OF THE CALENDAR MONTH — v2 §4.1 (OD-01) and §4.3
+        (OD-05).
+
+        OWNER-APPROVED 2026-08-13 — MONTH-END OBSERVATION RULE
+        ------------------------------------------------------
+        "The final observation belonging to a declared calendar month in the
+        synthetic fixture schedule is treated as that month's month-end decision
+        observation. The engine may determine this from declared observation
+        dates. It must NOT use future prices or future economic information to
+        determine month-end status."
+
+        This is an IMPLEMENTATION RULE for Mode E synthetic observation
+        schedules. It expressly does NOT: establish a formal exchange trading
+        calendar; establish P1-1; derive or decide P1-5; derive or decide P1-6;
+        establish H-1; authorize real market data; alter the qualification lane;
+        or alter the formal Baseline dataset definition.
+
+        Owner rationale: Mode E must be able to validate month-end mechanics on
+        synthetic and deliberately sparse observation schedules without
+        importing a real-market calendar dependency.
+
+        Implementation: index i is month-end when there is no later observation
+        in the same calendar month. It reads DATES ONLY and NEVER a future close
+        value, so no future market data influences any decision (v2 §6).
+
+        Rationale: in a real backtest the trading calendar is published in
+        advance, so "the final trading day of the month" is calendar information
+        rather than market data. This mirrors that, using the fixture's date
+        schedule as the calendar. It fixes no Baseline question — the Baseline
+        already fixes the decision date; this is only how the engine locates it.
+        """
+        d = self.obs[i][0]
+        for later_d, _ in self.obs[i + 1:]:
+            if (later_d.year, later_d.month) == (d.year, d.month):
+                return False
+        return True
+
     # ---- execution -------------------------------------------------------
     def execute_due(self, d, close):
         """Executes allocations whose valuation date has arrived.
@@ -233,8 +332,14 @@ class Engine:
             zone = classify_zone(dd, self.t_normal, self.t_large)
             self.log(d, "DRAWDOWN", reference_high=self.ath, dd=dd, zone=zone)
 
-            requested = strategy_b(zone, self.u_normal, self.u_large)
             month = f"{d.year:04d}-{d.month:02d}"
+            is_month_end = self.is_final_observation_of_month(i)
+            already = month in self.committed_months
+            requested = requested_units(
+                self.strategy, zone, is_month_end, already,
+                self.u_normal, self.u_large, self.u_dca, self.u_fallback)
+            if is_month_end:
+                self.log(d, "MONTH_END", month=month, strategy=self.strategy)
 
             if requested == 0:
                 self.log(d, "SIGNAL", signal="WAIT", zone=zone, units=Decimal("0"))
@@ -267,6 +372,7 @@ class Engine:
                 "attributed_budget_year": str(d.year),
                 "requested_units": str(requested), "accepted_units": accepted,
                 "capped": capped, "execute_on_or_after": exec_on,
+                "month_end": is_month_end, "zone": zone,
             }
             self.allocations.append(alloc)
             self.pending.append(alloc)
@@ -329,11 +435,31 @@ class Engine:
             f"reserved={self.reserved_outstanding} executed={self.executed_units}")
         chk("INV-12 execution never changes allocation month or budget year",
             all(a["attributed_month"] == a["committed_on"][:7] for a in self.allocations))
-        chk("INV-13 Strategy B never purchases in the High zone",
-            not any(e.get("zone") == HIGH for e in self.events
-                    if e["event"] in ("PURCHASE_REQUEST", "COMMITMENT")))
+        # Baseline Invariant 13 is STRATEGY-B-SPECIFIC: "Strategy B does not
+        # purchase in the High zone." Strategy A allocates at month-end
+        # irrespective of zone (§4.1: drawdown is not an input), and Strategy C's
+        # Month-End Fallback is EXPRESSLY a High-zone allocation (§4.3). Applying
+        # the B invariant to A or C would assert something the Baseline does not
+        # say. Scoped accordingly; A and C are covered by INV-14 and the
+        # month-end assertions instead.
+        if self.strategy == "B":
+            chk("INV-13 Strategy B never purchases in the High zone",
+                not any(a.get("zone") == HIGH for a in self.allocations))
+        else:
+            chk(f"INV-13 not applicable to Strategy {self.strategy} (B-specific)", True,
+                "Baseline Invariant 13 constrains Strategy B only")
         chk("INV-15 no same-month escalation after commitment",
             self.suppressed == sum(1 for e in self.events if e["event"] == "SIGNAL_SUPPRESSED"))
+        if self.strategy == "C":
+            fb = [a for a in self.allocations
+                  if Decimal(a["requested_units"]) == self.u_fallback]
+            chk("INV-14 Strategy C uses 0.5 only as the month-end fallback",
+                all(a.get("month_end") and a.get("zone") == HIGH for a in fb),
+                f"fallback allocations={len(fb)}")
+        else:
+            chk("INV-14 non-C strategy never requests the 0.5 fallback size",
+                not any(Decimal(a["requested_units"]) == self.u_fallback
+                        for a in self.allocations))
         chk("ENG-2 budget reconciles",
             self.granted == self.available + self.reserved_outstanding + self.executed_units)
         chk("ENG-3 no negative balances",
