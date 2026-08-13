@@ -1,0 +1,85 @@
+{
+  "classification": [
+    "NON-FORMAL — SIMULATION TRIAL",
+    "ENGINE VALIDATION FIXTURE",
+    "SYNTHETIC",
+    "NON-MARKET DATA",
+    "NON-ECONOMIC",
+    "NON-BASELINE",
+    "NON-PROMOTABLE"
+  ],
+  "warning": "SYNTHETIC NON-MARKET DATA. Invented for engine validation. Not an observation of any index, fund or security. MUST NEVER be represented as market evidence.",
+  "governing_baseline": "v2",
+  "dataset_class": "synthetic",
+  "fixture_id": "E2-M3",
+  "scenario_name": "Same-month suppression, including a stronger later signal",
+  "exposes": "§12.5 — later same-month signals create no request even when stronger; next month re-eligible",
+  "parameters": {
+    "unit_value_jpy": "10000",
+    "annual_units": "12.0",
+    "threshold_normal": "-0.10",
+    "threshold_large_drop": "-0.20",
+    "units_normal_zone": "1.0",
+    "units_large_drop_zone": "2.0",
+    "execution_valuation_rule": "NEXT_OBSERVATION_CLOSE",
+    "execution_valuation_rule_note": "Declared FIXTURE PARAMETER, not a Baseline execution-price determination. P1-1 and OD-04 untouched. Satisfies OD-03.",
+    "performance_start": "2021-05-03"
+  },
+  "observations": [
+    {
+      "date": "2021-05-03",
+      "close": "100"
+    },
+    {
+      "date": "2021-05-04",
+      "close": "85"
+    },
+    {
+      "date": "2021-05-05",
+      "close": "84"
+    },
+    {
+      "date": "2021-05-06",
+      "close": "80"
+    },
+    {
+      "date": "2021-06-01",
+      "close": "85"
+    },
+    {
+      "date": "2021-06-02",
+      "close": "100"
+    }
+  ],
+  "hand_derived_expectations": {
+    "note": "05-04 DD -0.15 NORMAL -> commit May. 05-05 DD -0.16 NORMAL suppressed (also executes May alloc at 84). 05-06 DD -0.20 -> LARGE_DROP, a STRONGER signal, still suppressed. June re-eligible.",
+    "allocations": [
+      {
+        "committed_on": "2021-05-04",
+        "attributed_month": "2021-05",
+        "attributed_budget_year": "2021",
+        "accepted_units": "1.0",
+        "executed_on": "2021-05-05",
+        "execution_close": "84"
+      },
+      {
+        "committed_on": "2021-06-01",
+        "attributed_month": "2021-06",
+        "attributed_budget_year": "2021",
+        "accepted_units": "1.0",
+        "executed_on": "2021-06-02",
+        "execution_close": "100",
+        "exposure_units_acquired": "100"
+      }
+    ],
+    "terminal_state": {
+      "reference_high": "100",
+      "budget_units_granted": "12.0",
+      "budget_units_available": "10.0",
+      "budget_units_reserved_outstanding": "0.0",
+      "budget_units_executed": "2.0",
+      "allocations_committed": 2,
+      "signals_suppressed_monthly_exclusivity": 2
+    }
+  }
+}

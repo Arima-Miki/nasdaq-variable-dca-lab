@@ -1,0 +1,57 @@
+{
+  "classification": [
+    "NON-FORMAL — SIMULATION TRIAL",
+    "ENGINE VALIDATION FIXTURE",
+    "SYNTHETIC",
+    "NON-MARKET DATA",
+    "NON-ECONOMIC",
+    "NON-BASELINE",
+    "NON-PROMOTABLE"
+  ],
+  "warning": "SYNTHETIC NON-MARKET DATA. Invented for engine validation. Not an observation of any index, fund or security. MUST NEVER be represented as market evidence.",
+  "governing_baseline": "v2",
+  "dataset_class": "synthetic",
+  "fixture_id": "E2-M4",
+  "scenario_name": "Month turnover with no qualifying signal",
+  "exposes": "calendar transition is a state transition, never a trade signal",
+  "parameters": {
+    "unit_value_jpy": "10000",
+    "annual_units": "12.0",
+    "threshold_normal": "-0.10",
+    "threshold_large_drop": "-0.20",
+    "units_normal_zone": "1.0",
+    "units_large_drop_zone": "2.0",
+    "execution_valuation_rule": "NEXT_OBSERVATION_CLOSE",
+    "execution_valuation_rule_note": "Declared FIXTURE PARAMETER, not a Baseline execution-price determination. P1-1 and OD-04 untouched. Satisfies OD-03.",
+    "performance_start": "2021-07-30"
+  },
+  "observations": [
+    {
+      "date": "2021-07-30",
+      "close": "100"
+    },
+    {
+      "date": "2021-08-02",
+      "close": "98"
+    },
+    {
+      "date": "2021-08-03",
+      "close": "99"
+    }
+  ],
+  "hand_derived_expectations": {
+    "note": "DD(98)=-0.02, DD(99)=-0.01 — both HIGH. No request, no allocation, budget untouched.",
+    "allocations": [],
+    "terminal_state": {
+      "reference_high": "100",
+      "budget_units_granted": "12.0",
+      "budget_units_available": "12.0",
+      "budget_units_reserved_outstanding": "0.0",
+      "budget_units_executed": "0.0",
+      "cash_deployed_jpy": "0",
+      "exposure_units_held": "0",
+      "allocations_committed": 0,
+      "signals_suppressed_monthly_exclusivity": 0
+    }
+  }
+}

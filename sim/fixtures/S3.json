@@ -1,0 +1,81 @@
+{
+  "classification": [
+    "NON-FORMAL — SIMULATION TRIAL",
+    "ENGINE VALIDATION FIXTURE",
+    "SYNTHETIC",
+    "NON-MARKET DATA",
+    "NON-ECONOMIC",
+    "NON-BASELINE",
+    "NON-PROMOTABLE"
+  ],
+  "warning": "SYNTHETIC NON-MARKET DATA. These values are invented for engine validation. They are not observations of any index, fund, or security, and MUST NEVER be represented as market evidence.",
+
+  "fixture_id": "S3",
+  "scenario_name": "First crossing into Normal zone",
+  "exposes": "1.0-unit trigger; commitment; reservation; monthly exclusivity suppression",
+  "governing_baseline": "v2",
+  "dataset_class": "synthetic",
+
+  "parameters": {
+    "unit_value_jpy": "10000",
+    "annual_units": "12.0",
+    "threshold_normal": "-0.10",
+    "threshold_large_drop": "-0.20",
+    "units_normal_zone": "1.0",
+    "units_large_drop_zone": "2.0",
+    "execution_valuation_rule": "NEXT_OBSERVATION_CLOSE",
+    "execution_valuation_rule_note": "Declared FIXTURE PARAMETER, not a Baseline execution-price determination. P1-1 and OD-04 are untouched. It satisfies OD-03: a Signal generated from a day's confirmed close is never executed at that same close.",
+    "performance_start": "2020-01-01"
+  },
+
+  "observations": [
+    { "date": "2020-01-01", "close": "100" },
+    { "date": "2020-01-02", "close": "120" },
+    { "date": "2020-01-03", "close": "114" },
+    { "date": "2020-01-06", "close": "102" },
+    { "date": "2020-01-07", "close": "100" },
+    { "date": "2020-01-08", "close": "105" }
+  ],
+
+  "hand_derived_expectations": {
+    "note": "Derived by hand BEFORE the engine was written. All values are exact rationals. Most have terminating decimal forms; the 2020-01-07 drawdown does NOT (it is exactly -1/6), so its decimal rendering is precision-dependent and is recorded alongside the exact rational. CORRECTION, recorded openly: this note originally claimed every value was exact as written, which was wrong for that one entry. The engine was not at fault.",
+    "per_observation": [
+      { "date": "2020-01-01", "ath": "100", "dd": "0",      "zone": "HIGH",   "signal": "WAIT", "reason": "DD > -10%" },
+      { "date": "2020-01-02", "ath": "120", "dd": "0",      "zone": "HIGH",   "signal": "WAIT", "reason": "new ATH, DD = 0" },
+      { "date": "2020-01-03", "ath": "120", "dd": "-0.05",  "zone": "HIGH",   "signal": "WAIT", "reason": "(114-120)/120 = -0.05 > -0.10" },
+      { "date": "2020-01-06", "ath": "120", "dd": "-0.15",  "zone": "NORMAL", "signal": "TRIGGER_1.0", "reason": "(102-120)/120 = -0.15; -0.20 < DD <= -0.10" },
+      { "date": "2020-01-07", "ath": "120", "dd_exact_rational": "-1/6", "dd_decimal_28": "-0.1666666666666666666666666667", "dd_note": "non-terminating; compare as a rational or as a correctly-rounded decimal at the engine's declared precision. Nowhere near a zone boundary, so M-7 is untouched.", "zone": "NORMAL", "signal": "SUPPRESSED", "reason": "2020-01 already has a committed allocation" },
+      { "date": "2020-01-08", "ath": "120", "dd": "-0.125", "zone": "NORMAL", "signal": "SUPPRESSED", "reason": "2020-01 already has a committed allocation" }
+    ],
+    "allocations": [
+      {
+        "committed_on": "2020-01-06",
+        "attributed_month": "2020-01",
+        "attributed_budget_year": "2020",
+        "requested_units": "1.0",
+        "available_units_at_request": "12.0",
+        "accepted_units": "1.0",
+        "capped": false,
+        "executed_on": "2020-01-07",
+        "execution_close": "100",
+        "amount_jpy": "10000",
+        "exposure_units_acquired": "100"
+      }
+    ],
+    "terminal_state": {
+      "reference_high": "120",
+      "final_dd": "-0.125",
+      "final_zone": "NORMAL",
+      "budget_units_granted": "12.0",
+      "budget_units_available": "11.0",
+      "budget_units_reserved_outstanding": "0.0",
+      "budget_units_executed": "1.0",
+      "cash_granted_jpy": "120000",
+      "cash_deployed_jpy": "10000",
+      "cash_remaining_jpy": "110000",
+      "exposure_units_held": "100",
+      "allocations_committed": 1,
+      "signals_suppressed_monthly_exclusivity": 2
+    }
+  }
+}

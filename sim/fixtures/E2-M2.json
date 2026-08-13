@@ -1,0 +1,84 @@
+{
+  "classification": [
+    "NON-FORMAL — SIMULATION TRIAL",
+    "ENGINE VALIDATION FIXTURE",
+    "SYNTHETIC",
+    "NON-MARKET DATA",
+    "NON-ECONOMIC",
+    "NON-BASELINE",
+    "NON-PROMOTABLE"
+  ],
+  "warning": "SYNTHETIC NON-MARKET DATA. Invented for engine validation. Not an observation of any index, fund or security. MUST NEVER be represented as market evidence.",
+  "governing_baseline": "v2",
+  "dataset_class": "synthetic",
+  "fixture_id": "E2-M2",
+  "scenario_name": "Commitment in month N, execution in month N+1",
+  "exposes": "attribution must follow the month of ACCEPTANCE (§12.2), not execution (§12.3)",
+  "parameters": {
+    "unit_value_jpy": "10000",
+    "annual_units": "12.0",
+    "threshold_normal": "-0.10",
+    "threshold_large_drop": "-0.20",
+    "units_normal_zone": "1.0",
+    "units_large_drop_zone": "2.0",
+    "execution_valuation_rule": "NEXT_OBSERVATION_CLOSE",
+    "execution_valuation_rule_note": "Declared FIXTURE PARAMETER, not a Baseline execution-price determination. P1-1 and OD-04 untouched. Satisfies OD-03.",
+    "performance_start": "2021-03-30"
+  },
+  "observations": [
+    {
+      "date": "2021-03-30",
+      "close": "100"
+    },
+    {
+      "date": "2021-03-31",
+      "close": "85"
+    },
+    {
+      "date": "2021-04-01",
+      "close": "100"
+    },
+    {
+      "date": "2021-04-02",
+      "close": "85"
+    },
+    {
+      "date": "2021-04-05",
+      "close": "100"
+    }
+  ],
+  "hand_derived_expectations": {
+    "note": "DD(85)=(85-100)/100=-0.15 -> NORMAL. March commitment executes on the first April observation; attribution stays 2021-03. April is then independently eligible.",
+    "allocations": [
+      {
+        "committed_on": "2021-03-31",
+        "attributed_month": "2021-03",
+        "attributed_budget_year": "2021",
+        "accepted_units": "1.0",
+        "executed_on": "2021-04-01",
+        "execution_close": "100",
+        "exposure_units_acquired": "100"
+      },
+      {
+        "committed_on": "2021-04-02",
+        "attributed_month": "2021-04",
+        "attributed_budget_year": "2021",
+        "accepted_units": "1.0",
+        "executed_on": "2021-04-05",
+        "execution_close": "100",
+        "exposure_units_acquired": "100"
+      }
+    ],
+    "terminal_state": {
+      "reference_high": "100",
+      "budget_units_granted": "12.0",
+      "budget_units_available": "10.0",
+      "budget_units_reserved_outstanding": "0.0",
+      "budget_units_executed": "2.0",
+      "cash_deployed_jpy": "20000",
+      "exposure_units_held": "200",
+      "allocations_committed": 2,
+      "signals_suppressed_monthly_exclusivity": 0
+    }
+  }
+}
