@@ -386,6 +386,12 @@ class Engine:
         last_close = self.obs[-1][1]
         dd = (last_close - self.ath) / self.ath
         return {
+            # E4: the strategy actually executed is engine state and must be
+            # recoverable from the evidence itself, not only from the manifest.
+            # E3 found a driver defect where the manifest could name a strategy
+            # the engine never ran; carrying it here makes that disagreement
+            # detectable from the written outputs alone.
+            "strategy": self.strategy,
             "reference_high": str(self.ath),
             "final_dd": str(dd),
             "final_zone": classify_zone(dd, self.t_normal, self.t_large),
