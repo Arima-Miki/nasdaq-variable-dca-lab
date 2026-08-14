@@ -71,13 +71,18 @@ def permitted_terminal_state(ts):
 
 def main(csv_path, parameters, dataset_id, strategy, run_id,
          dataset_class="constructed", acquisition=None, run_date="2026-08-14",
-         extra_columns="reject", store=None):
+         extra_columns="reject", store=None, extra_labels=None):
     """Execute one Mode-P run.
 
     `dataset_class` MUST be "constructed" for fixture validation and
     "provisional" for a real historical dataset (§18.4.9).
     `acquisition` carries the human-in-the-loop record; fields that only make
     sense for real acquisition are marked NOT APPLICABLE rather than fabricated.
+    `extra_labels`, if given, are appended verbatim to the manifest
+    classification list. Used to carry dataset-specific mandatory disclosure
+    labels (e.g. an Owner-imposed §18.4.7 release condition) without altering
+    the shared CLASSIFICATION_P/CONSTRUCTED_FIXTURE_LABELS behaviour. Defaults
+    to None, which is a no-op — existing callers are unaffected.
     """
     if dataset_class not in ("constructed", "provisional"):
         raise EvidenceSafetyError(
@@ -117,7 +122,8 @@ def main(csv_path, parameters, dataset_id, strategy, run_id,
 
     manifest = {
         "classification": CLASSIFICATION_P + (
-            CONSTRUCTED_FIXTURE_LABELS if dataset_class == "constructed" else []),
+            CONSTRUCTED_FIXTURE_LABELS if dataset_class == "constructed" else []) +
+            (list(extra_labels) if extra_labels else []),
         "prohibited_uses": PROHIBITED_USES,
         "run_id": run_id,
         "execution_mode": "P",
