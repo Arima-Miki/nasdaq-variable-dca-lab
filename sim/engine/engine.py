@@ -70,6 +70,33 @@ def classify_zone(dd, t_normal, t_large):
     return HIGH
 
 
+def classify_zone_scaled(close, ath, t_normal, t_large):
+    """MP-R-01 — EXACT SCALED COMPARISON. Owner-approved 2026-08-14, preserved
+    in the Mode-P Decision Boundary (commit 91378fe).
+
+    Classifying by the quotient `(close - ath) / ath` requires DIVIDING first,
+    and division of finite decimals is generally non-terminating, so the value
+    compared is a ROUNDED one. Multiplying instead is exact:
+
+        DD <= -0.10   <=>   close <= 0.9 * ath
+        DD <= -0.20   <=>   close <= 0.8 * ath        (ath > 0)
+
+    Both sides are finite decimals, so every zone decision is exact for every
+    representable close. This is an implementation representation of the
+    ALREADY-FIXED §4.0 semantics: it adopts NO tolerance, performs NO rounding
+    before comparison, and DOES NOT resolve M-7, which remains OPEN.
+
+    Derived generally from the thresholds so the frozen boundary ownership is
+    preserved rather than re-stated as magic constants: for threshold t,
+    `DD <= t  <=>  close <= (1 + t) * ath`.
+    """
+    if close <= (Decimal(1) + t_large) * ath:
+        return LARGE_DROP
+    if close <= (Decimal(1) + t_normal) * ath:
+        return NORMAL
+    return HIGH
+
+
 def daily_trigger(zone, units_normal, units_large):
     """Daily Drawdown Trigger, shared by Strategies B and C — v2 §4.2/§4.3/§4.4,
     OD-09. High zone -> no Daily Trigger."""
@@ -328,8 +355,11 @@ class Engine:
             if prev is None or self.ath != prev:
                 self.log(d, "ATH_UPDATE", reference_high=self.ath)
 
-            dd = (close - self.ath) / self.ath          # §4.0
-            zone = classify_zone(dd, self.t_normal, self.t_large)
+            # MP-R-01: `dd` is computed for REPORTING ONLY and is never an input
+            # to classification. Classification uses the exact scaled comparison,
+            # which needs no division and therefore no pre-comparison rounding.
+            dd = (close - self.ath) / self.ath          # §4.0, rendering only
+            zone = classify_zone_scaled(close, self.ath, self.t_normal, self.t_large)
             self.log(d, "DRAWDOWN", reference_high=self.ath, dd=dd, zone=zone)
 
             month = f"{d.year:04d}-{d.month:02d}"
@@ -394,7 +424,8 @@ class Engine:
             "strategy": self.strategy,
             "reference_high": str(self.ath),
             "final_dd": str(dd),
-            "final_zone": classify_zone(dd, self.t_normal, self.t_large),
+            "final_zone": classify_zone_scaled(last_close, self.ath,
+                                               self.t_normal, self.t_large),
             "budget_units_granted": str(self.granted),
             "budget_units_available": str(self.available),
             "budget_units_reserved_outstanding": str(self.reserved_outstanding),
