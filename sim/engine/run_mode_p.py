@@ -16,7 +16,7 @@ import json, subprocess, sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from engine import Engine  # noqa: E402
+from engine import Engine, STRATEGY_D_LABELS  # noqa: E402
 from csv_loader import build_fixture  # noqa: E402
 from run_mode_e import (EvidenceSafetyError, OUTPUT_FILES,  # noqa: E402
                         simulator_paths_match_commit, git)
@@ -123,6 +123,7 @@ def main(csv_path, parameters, dataset_id, strategy, run_id,
     manifest = {
         "classification": CLASSIFICATION_P + (
             CONSTRUCTED_FIXTURE_LABELS if dataset_class == "constructed" else []) +
+            (STRATEGY_D_LABELS if strategy == "D" else []) +
             (list(extra_labels) if extra_labels else []),
         "prohibited_uses": PROHIBITED_USES,
         "run_id": run_id,
@@ -139,6 +140,11 @@ def main(csv_path, parameters, dataset_id, strategy, run_id,
             "A": "BASELINE RULE (frozen, Baseline v2 §4.1, OD-01)",
             "B": "BASELINE RULE (frozen, Baseline v2 §4.2, OD-09)",
             "C": "BASELINE RULE (frozen, Baseline v2 §4.3, OD-05)",
+            "D": "EXPERIMENTAL VARIANT — NOT BASELINE (§18.4.5). OWNER-GENERATED "
+                 "POST-RESULT ALTERNATIVE HYPOTHESIS — NOT ADOPTED, NOT VALIDATED. "
+                 "docs/decisions/simulation_trial_strategy_d_owner_hypothesis.md "
+                 "(5a3f54a); semantics docs/decisions/"
+                 "simulation_trial_strategy_d_owner_semantic_decision.md (62c5c42).",
         }[strategy],
         "dataset_id": dataset_id,
         "dataset_class": dataset_class,
