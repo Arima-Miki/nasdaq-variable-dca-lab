@@ -1,0 +1,124 @@
+{
+  "classification": [
+    "NON-FORMAL — SIMULATION TRIAL",
+    "ENGINE VALIDATION FIXTURE",
+    "SYNTHETIC",
+    "NON-MARKET DATA",
+    "NON-ECONOMIC",
+    "NON-BASELINE",
+    "NON-PROMOTABLE",
+    "EXPERIMENTAL VARIANT — NOT BASELINE"
+  ],
+  "warning": "SYNTHETIC NON-MARKET DATA. Invented for engine validation of Strategy D (EXPERIMENTAL VARIANT — NOT BASELINE; OWNER-GENERATED POST-RESULT ALTERNATIVE HYPOTHESIS, docs/decisions/simulation_trial_strategy_d_owner_hypothesis.md 5a3f54a, semantics fixed by docs/decisions/simulation_trial_strategy_d_owner_semantic_decision.md 62c5c42). Not an observation of any index, fund or security. MUST NEVER be represented as market evidence, and this run is NOT evidence about Strategy D's economic merit relative to A, B, or C.",
+  "governing_baseline": "v2",
+  "dataset_class": "synthetic",
+  "fixture_id": "D9",
+  "scenario_name": "Exact threshold cases at the -10%/-20% boundaries",
+  "exposes": "boundary ownership (-10.0% -> NORMAL, -20.0% -> LARGE_DROP, §4.0) is unchanged and shared with A/B/C; Strategy D's own tranche logic responds correctly at each boundary in sequence",
+  "parameters": {
+    "unit_value_jpy": "10000",
+    "threshold_normal": "-0.10",
+    "threshold_large_drop": "-0.20",
+    "units_normal_zone": "1.0",
+    "units_large_drop_zone": "2.0",
+    "units_strategy_a_monthly": "1.0",
+    "units_month_end_fallback": "0.5",
+    "execution_valuation_rule": "NEXT_OBSERVATION_CLOSE",
+    "execution_valuation_rule_note": "Declared FIXTURE PARAMETER, not a Baseline execution-price determination. P1-1/OD-04 untouched. Satisfies OD-03.",
+    "annual_units": "12.0",
+    "performance_start": "2021-01-04"
+  },
+  "observations": [
+    {
+      "date": "2021-01-04",
+      "close": "100"
+    },
+    {
+      "date": "2021-01-05",
+      "close": "90.01"
+    },
+    {
+      "date": "2021-01-06",
+      "close": "90.00"
+    },
+    {
+      "date": "2021-01-07",
+      "close": "89.99"
+    },
+    {
+      "date": "2021-01-08",
+      "close": "80.01"
+    },
+    {
+      "date": "2021-01-09",
+      "close": "80.00"
+    },
+    {
+      "date": "2021-01-10",
+      "close": "79.99"
+    }
+  ],
+  "hand_derived_expectations": {
+    "note": "Hand-reasoned, all DD against ATH=100 (never updated since every subsequent close is below 100): 01-05 -9.99% -> HIGH, no signal. 01-06 exactly -10.00% -> NORMAL (§4.0: the -10.0% boundary belongs to Normal) -> Strategy D's Normal tranche fires, nominal 1.0, accepted 1.0. 01-07 -10.01% -> still NORMAL -> SD-2 repeat suppression. 01-08 -19.99% -> still NORMAL -> SD-2 repeat suppression. 01-09 exactly -20.00% -> LARGE_DROP (§4.0: the -20.0% boundary belongs to Large-drop), strictly after the positive Normal acceptance -> SD-3 escalation fires, nominal 1.0, accepted 1.0. 01-10 -20.01% -> LARGE_DROP but both tranches already used -> suppressed. Boundary ownership itself is asserted unchanged because classify_zone_scaled (shared, untouched code) is the sole classifier; this fixture exercises Strategy D's response to it, not the classifier.",
+    "per_strategy": {
+      "D": {
+        "allocations": [
+          {
+            "committed_on": "2021-01-06",
+            "attributed_month": "2021-01",
+            "attributed_budget_year": "2021",
+            "requested_units": "1.0",
+            "accepted_units": "1.0",
+            "capped": false,
+            "execute_on_or_after": "2021-01-07",
+            "month_end": false,
+            "zone": "NORMAL",
+            "strategy_d_tranche": "NORMAL",
+            "executed_on": "2021-01-07",
+            "execution_close": "89.99",
+            "amount_jpy": "10000.0",
+            "exposure_units_acquired": "111.1234581620180020002222469163240360040"
+          },
+          {
+            "committed_on": "2021-01-09",
+            "attributed_month": "2021-01",
+            "attributed_budget_year": "2021",
+            "requested_units": "1.0",
+            "accepted_units": "1.0",
+            "capped": false,
+            "execute_on_or_after": "2021-01-10",
+            "month_end": false,
+            "zone": "LARGE_DROP",
+            "strategy_d_tranche": "LARGE_DROP_ESCALATION",
+            "executed_on": "2021-01-10",
+            "execution_close": "79.99",
+            "amount_jpy": "10000.0",
+            "exposure_units_acquired": "125.0156269533691711463932991623952994124"
+          }
+        ],
+        "terminal_state": {
+          "strategy": "D",
+          "reference_high": "100",
+          "final_dd": "-0.2001",
+          "final_zone": "LARGE_DROP",
+          "budget_units_granted": "12.0",
+          "budget_units_available": "10.0",
+          "budget_units_reserved_outstanding": "0.0",
+          "budget_units_executed": "2.0",
+          "cash_granted_jpy": "120000.0",
+          "cash_deployed_jpy": "20000.0",
+          "cash_remaining_jpy": "100000.0",
+          "exposure_units_held": "236.1390851153871731466155460787193354164",
+          "allocations_committed": 2,
+          "signals_suppressed_monthly_exclusivity": 3
+        },
+        "suppressed_count": 3,
+        "suppression_reasons": [
+          "STRATEGY_D_REPEATED_NORMAL_NO_ADDITIONAL_ALLOCATION",
+          "STRATEGY_D_REPEATED_NORMAL_NO_ADDITIONAL_ALLOCATION",
+          "STRATEGY_D_MONTHLY_CAPACITY_EXHAUSTED"
+        ]
+      }
+    }
+  }
+}

@@ -8,7 +8,7 @@ import json, os, subprocess, sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from engine import Engine, load, CLASSIFICATION  # noqa: E402
+from engine import Engine, load, CLASSIFICATION, STRATEGY_D_LABELS  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
 STORE = Path.home() / "research-materials" / "nasdaq-variable-dca-lab" / "simulation-trial-mode-e"
@@ -103,7 +103,7 @@ def main(fixture_id="S3", strategy="B", run_id="E1-S3-B-001", run_date="2026-08-
     out.mkdir(parents=True, exist_ok=True)
 
     manifest = {
-        "classification": CLASSIFICATION,
+        "classification": CLASSIFICATION + (STRATEGY_D_LABELS if strategy == "D" else []),
         "prohibited_uses": [
             "investment performance", "expected return", "historical performance",
             "Baseline result", "qualification evidence", "strategy superiority",
@@ -125,6 +125,11 @@ def main(fixture_id="S3", strategy="B", run_id="E1-S3-B-001", run_date="2026-08-
             "A": "BASELINE RULE (frozen, Baseline v2 §4.1, OD-01)",
             "B": "BASELINE RULE (frozen, Baseline v2 §4.2, OD-09)",
             "C": "BASELINE RULE (frozen, Baseline v2 §4.3, OD-05)",
+            "D": "EXPERIMENTAL VARIANT — NOT BASELINE (§18.4.5). OWNER-GENERATED "
+                 "POST-RESULT ALTERNATIVE HYPOTHESIS — NOT ADOPTED, NOT VALIDATED. "
+                 "docs/decisions/simulation_trial_strategy_d_owner_hypothesis.md "
+                 "(5a3f54a); semantics docs/decisions/"
+                 "simulation_trial_strategy_d_owner_semantic_decision.md (62c5c42).",
         }[strategy],
         "dataset_id": fixture_id,
         "dataset_class": "synthetic",

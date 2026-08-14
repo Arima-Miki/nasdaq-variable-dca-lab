@@ -1,0 +1,95 @@
+{
+  "classification": [
+    "NON-FORMAL — SIMULATION TRIAL",
+    "ENGINE VALIDATION FIXTURE",
+    "SYNTHETIC",
+    "NON-MARKET DATA",
+    "NON-ECONOMIC",
+    "NON-BASELINE",
+    "NON-PROMOTABLE",
+    "EXPERIMENTAL VARIANT — NOT BASELINE"
+  ],
+  "warning": "SYNTHETIC NON-MARKET DATA. Invented for engine validation of Strategy D (EXPERIMENTAL VARIANT — NOT BASELINE; OWNER-GENERATED POST-RESULT ALTERNATIVE HYPOTHESIS, docs/decisions/simulation_trial_strategy_d_owner_hypothesis.md 5a3f54a, semantics fixed by docs/decisions/simulation_trial_strategy_d_owner_semantic_decision.md 62c5c42). Not an observation of any index, fund or security. MUST NEVER be represented as market evidence, and this run is NOT evidence about Strategy D's economic merit relative to A, B, or C.",
+  "governing_baseline": "v2",
+  "dataset_class": "synthetic",
+  "fixture_id": "D10",
+  "scenario_name": "Insufficient funding for a direct Large-drop request",
+  "exposes": "a direct Large-drop request for 2.0 is capped to a positive partial amount by insufficient funding; capacity consumption equals the actual accepted amount, and the month's opportunity is still exhausted (no funding manufactured) (SD-1/SD-4)",
+  "parameters": {
+    "unit_value_jpy": "10000",
+    "threshold_normal": "-0.10",
+    "threshold_large_drop": "-0.20",
+    "units_normal_zone": "1.0",
+    "units_large_drop_zone": "2.0",
+    "units_strategy_a_monthly": "1.0",
+    "units_month_end_fallback": "0.5",
+    "execution_valuation_rule": "NEXT_OBSERVATION_CLOSE",
+    "execution_valuation_rule_note": "Declared FIXTURE PARAMETER, not a Baseline execution-price determination. P1-1/OD-04 untouched. Satisfies OD-03.",
+    "annual_units": "1.5",
+    "performance_start": "2021-01-04"
+  },
+  "observations": [
+    {
+      "date": "2021-01-04",
+      "close": "100"
+    },
+    {
+      "date": "2021-01-05",
+      "close": "70"
+    },
+    {
+      "date": "2021-01-06",
+      "close": "80"
+    },
+    {
+      "date": "2021-01-07",
+      "close": "60"
+    }
+  ],
+  "hand_derived_expectations": {
+    "note": "Hand-reasoned: annual budget is only 1.5 units. 01-05 direct Large-drop fires nominal 2.0, but only 1.5 is available -> accepted=1.5 (capped=true); capacity consumed is the actual accepted 1.5, not the nominal 2.0 (SD-4/SD-5 consistency check, section 6). 01-07, still LARGE_DROP and deeper: the direct path already attempted this month (regardless of the capped outcome) -> suppressed; no funding is manufactured to permit a second attempt, and 0.5 of nominal capacity remains formally unused but unreachable because the direct tranche fires at most once per month.",
+    "per_strategy": {
+      "D": {
+        "allocations": [
+          {
+            "committed_on": "2021-01-05",
+            "attributed_month": "2021-01",
+            "attributed_budget_year": "2021",
+            "requested_units": "2.0",
+            "accepted_units": "1.5",
+            "capped": true,
+            "execute_on_or_after": "2021-01-06",
+            "month_end": false,
+            "zone": "LARGE_DROP",
+            "strategy_d_tranche": "DIRECT_LARGE_DROP",
+            "executed_on": "2021-01-06",
+            "execution_close": "80",
+            "amount_jpy": "15000.0",
+            "exposure_units_acquired": "187.5"
+          }
+        ],
+        "terminal_state": {
+          "strategy": "D",
+          "reference_high": "100",
+          "final_dd": "-0.4",
+          "final_zone": "LARGE_DROP",
+          "budget_units_granted": "1.5",
+          "budget_units_available": "0.0",
+          "budget_units_reserved_outstanding": "0.0",
+          "budget_units_executed": "1.5",
+          "cash_granted_jpy": "15000.0",
+          "cash_deployed_jpy": "15000.0",
+          "cash_remaining_jpy": "0.0",
+          "exposure_units_held": "187.5",
+          "allocations_committed": 1,
+          "signals_suppressed_monthly_exclusivity": 2
+        },
+        "suppressed_count": 2,
+        "suppression_reasons": [
+          "STRATEGY_D_MONTHLY_CAPACITY_EXHAUSTED",
+          "STRATEGY_D_MONTHLY_CAPACITY_EXHAUSTED"
+        ]
+      }
+    }
+  }
+}

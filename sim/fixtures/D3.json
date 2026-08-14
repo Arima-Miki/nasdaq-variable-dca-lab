@@ -1,0 +1,95 @@
+{
+  "classification": [
+    "NON-FORMAL — SIMULATION TRIAL",
+    "ENGINE VALIDATION FIXTURE",
+    "SYNTHETIC",
+    "NON-MARKET DATA",
+    "NON-ECONOMIC",
+    "NON-BASELINE",
+    "NON-PROMOTABLE",
+    "EXPERIMENTAL VARIANT — NOT BASELINE"
+  ],
+  "warning": "SYNTHETIC NON-MARKET DATA. Invented for engine validation of Strategy D (EXPERIMENTAL VARIANT — NOT BASELINE; OWNER-GENERATED POST-RESULT ALTERNATIVE HYPOTHESIS, docs/decisions/simulation_trial_strategy_d_owner_hypothesis.md 5a3f54a, semantics fixed by docs/decisions/simulation_trial_strategy_d_owner_semantic_decision.md 62c5c42). Not an observation of any index, fund or security. MUST NEVER be represented as market evidence, and this run is NOT evidence about Strategy D's economic merit relative to A, B, or C.",
+  "governing_baseline": "v2",
+  "dataset_class": "synthetic",
+  "fixture_id": "D3",
+  "scenario_name": "Direct Large-drop as first qualifying event",
+  "exposes": "first qualifying observation of the month is already Large-drop -> single 2.0 allocation; no later top-up even on further deterioration (SD-1)",
+  "parameters": {
+    "unit_value_jpy": "10000",
+    "threshold_normal": "-0.10",
+    "threshold_large_drop": "-0.20",
+    "units_normal_zone": "1.0",
+    "units_large_drop_zone": "2.0",
+    "units_strategy_a_monthly": "1.0",
+    "units_month_end_fallback": "0.5",
+    "execution_valuation_rule": "NEXT_OBSERVATION_CLOSE",
+    "execution_valuation_rule_note": "Declared FIXTURE PARAMETER, not a Baseline execution-price determination. P1-1/OD-04 untouched. Satisfies OD-03.",
+    "annual_units": "12.0",
+    "performance_start": "2021-01-04"
+  },
+  "observations": [
+    {
+      "date": "2021-01-04",
+      "close": "100"
+    },
+    {
+      "date": "2021-01-05",
+      "close": "70"
+    },
+    {
+      "date": "2021-01-06",
+      "close": "80"
+    },
+    {
+      "date": "2021-01-07",
+      "close": "60"
+    }
+  ],
+  "hand_derived_expectations": {
+    "note": "Hand-reasoned: 01-05 DD=(70-100)/100=-30% -> LARGE_DROP as the FIRST qualifying observation of the month (no prior Normal trigger) -> SD-1 direct path, single allocation, nominal 2.0, budget ample -> accepted 2.0. 01-07 DD=-40%, still LARGE_DROP, but the month's Strategy-D capacity/tranches are already exhausted via the direct path -> suppressed, no top-up regardless of further deterioration.",
+    "per_strategy": {
+      "D": {
+        "allocations": [
+          {
+            "committed_on": "2021-01-05",
+            "attributed_month": "2021-01",
+            "attributed_budget_year": "2021",
+            "requested_units": "2.0",
+            "accepted_units": "2.0",
+            "capped": false,
+            "execute_on_or_after": "2021-01-06",
+            "month_end": false,
+            "zone": "LARGE_DROP",
+            "strategy_d_tranche": "DIRECT_LARGE_DROP",
+            "executed_on": "2021-01-06",
+            "execution_close": "80",
+            "amount_jpy": "20000.0",
+            "exposure_units_acquired": "250.0"
+          }
+        ],
+        "terminal_state": {
+          "strategy": "D",
+          "reference_high": "100",
+          "final_dd": "-0.4",
+          "final_zone": "LARGE_DROP",
+          "budget_units_granted": "12.0",
+          "budget_units_available": "10.0",
+          "budget_units_reserved_outstanding": "0.0",
+          "budget_units_executed": "2.0",
+          "cash_granted_jpy": "120000.0",
+          "cash_deployed_jpy": "20000.0",
+          "cash_remaining_jpy": "100000.0",
+          "exposure_units_held": "250.0",
+          "allocations_committed": 1,
+          "signals_suppressed_monthly_exclusivity": 2
+        },
+        "suppressed_count": 2,
+        "suppression_reasons": [
+          "STRATEGY_D_MONTHLY_CAPACITY_EXHAUSTED",
+          "STRATEGY_D_MONTHLY_CAPACITY_EXHAUSTED"
+        ]
+      }
+    }
+  }
+}

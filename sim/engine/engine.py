@@ -56,6 +56,15 @@ CLASSIFICATION = [
     "NON-PROMOTABLE",
 ]
 
+# §18.4.5. Mandatory, additional to CLASSIFICATION, for every Strategy-D run —
+# never applied to A, B, or C.
+STRATEGY_D_LABELS = [
+    "EXPERIMENTAL VARIANT — NOT BASELINE",
+    "OWNER-GENERATED POST-RESULT ALTERNATIVE HYPOTHESIS",
+    "NOT ADOPTED",
+    "NOT VALIDATED",
+]
+
 HIGH, NORMAL, LARGE_DROP = "HIGH", "NORMAL", "LARGE_DROP"
 
 
@@ -196,7 +205,7 @@ def validate(fixture):
 
 
 class Engine:
-    SUPPORTED_STRATEGIES = ("A", "B", "C")
+    SUPPORTED_STRATEGIES = ("A", "B", "C", "D")
 
     def __init__(self, fixture, strategy="B"):
         if strategy not in self.SUPPORTED_STRATEGIES:
@@ -233,6 +242,14 @@ class Engine:
         self.allocations = []
         self.events = []
         self.suppressed = 0
+
+        # Strategy D only (EXPERIMENTAL VARIANT — NOT BASELINE). Owner-generated
+        # post-result alternative hypothesis, docs/decisions/
+        # simulation_trial_strategy_d_owner_hypothesis.md (5a3f54a), semantics
+        # fixed by docs/decisions/simulation_trial_strategy_d_owner_semantic_
+        # decision.md (62c5c42). Harmless, unused for A/B/C.
+        self.d_month_state = {}
+        self.d_monthly_capacity = Decimal("2.0")   # a rule ceiling, not a funding grant
 
     # ---- event log -------------------------------------------------------
     def log(self, d, kind, **kw):
@@ -364,12 +381,19 @@ class Engine:
 
             month = f"{d.year:04d}-{d.month:02d}"
             is_month_end = self.is_final_observation_of_month(i)
+            if is_month_end:
+                self.log(d, "MONTH_END", month=month, strategy=self.strategy)
+
+            if self.strategy == "D":
+                # EXPERIMENTAL VARIANT — NOT BASELINE. Strategy A/B/C mechanics
+                # below are entirely untouched by this branch.
+                self._handle_strategy_d_signal(d, i, zone, month)
+                continue
+
             already = month in self.committed_months
             requested = requested_units(
                 self.strategy, zone, is_month_end, already,
                 self.u_normal, self.u_large, self.u_dca, self.u_fallback)
-            if is_month_end:
-                self.log(d, "MONTH_END", month=month, strategy=self.strategy)
 
             if requested == 0:
                 self.log(d, "SIGNAL", signal="WAIT", zone=zone, units=Decimal("0"))
@@ -410,6 +434,131 @@ class Engine:
                      accepted_units=accepted, available_after=self.available,
                      reserved_outstanding=self.reserved_outstanding)
         return self
+
+    # ---- Strategy D (EXPERIMENTAL VARIANT — NOT BASELINE) ----------------
+    def _handle_strategy_d_signal(self, d, i, zone, month):
+        """Implements ONLY the preserved Strategy-D semantic decision
+        (docs/decisions/simulation_trial_strategy_d_owner_semantic_decision.md,
+        commit 62c5c42, resolving SD-1 .. SD-10 against the hypothesis
+        registered at docs/decisions/simulation_trial_strategy_d_owner_
+        hypothesis.md, commit 5a3f54a). Defines no new semantics.
+
+        NOT a Baseline v2 strategy. Baseline v2 defines only Strategies A, B
+        and C (§4). Strategy D is an OWNER-GENERATED POST-RESULT ALTERNATIVE
+        HYPOTHESIS, confined to the Simulation Trial lane (§18.4.5): every
+        run touching it MUST carry the EXPERIMENTAL VARIANT — NOT BASELINE
+        label. It does not alter Strategy A, B, or C in any way — this method
+        is reached only when self.strategy == "D".
+
+        Reuses, unchanged, the same commitment/reservation/execution state
+        (self.available, self.reserved_outstanding, self.allocations,
+        self.pending) and the same event log used by A/B/C, so execute_due(),
+        terminal_state() and the shared invariants need no Strategy-D-specific
+        branch beyond what is added explicitly in invariants().
+        """
+        st = self.d_month_state.setdefault(month, {
+            "normal_attempted": False, "normal_accepted": Decimal("0"),
+            "escalation_attempted": False, "direct_attempted": False,
+        })
+
+        if zone == HIGH:
+            self.log(d, "SIGNAL", signal="WAIT", zone=zone, units=Decimal("0"))
+            return
+
+        if st["direct_attempted"]:
+            # SD-1: the direct Large-drop path already consumed this month's
+            # capacity/tranches; no later deterioration reopens it.
+            self.suppressed += 1
+            self.log(d, "SIGNAL_SUPPRESSED", zone=zone, requested_units=Decimal("0"),
+                     reason="STRATEGY_D_MONTHLY_CAPACITY_EXHAUSTED", month=month)
+            return
+
+        if zone == NORMAL:
+            if st["normal_attempted"]:
+                # SD-2: repeated non-escalating Normal-zone signal.
+                self.suppressed += 1
+                self.log(d, "SIGNAL_SUPPRESSED", zone=zone, requested_units=Decimal("0"),
+                         reason="STRATEGY_D_REPEATED_NORMAL_NO_ADDITIONAL_ALLOCATION",
+                         month=month)
+                return
+            requested = self.u_normal
+            tranche = "NORMAL"
+        else:  # LARGE_DROP
+            if not st["normal_attempted"]:
+                # SD-1: first qualifying observation of the month is already
+                # Large-drop — a single, direct 2.0-unit allocation.
+                requested = self.u_large
+                tranche = "DIRECT_LARGE_DROP"
+            elif st["normal_accepted"] == 0:
+                # Derived consequence of SD-5 combined with the unmodified
+                # escalation gate (semantic decision §6): a zero-capped Normal
+                # attempt creates no commitment, so "after that first
+                # allocation has been accepted" is never satisfied. This is
+                # NOT the direct-Large-drop path either, since a Normal-zone
+                # observation occurred first, chronologically, this month.
+                self.suppressed += 1
+                self.log(d, "SIGNAL_SUPPRESSED", zone=zone, requested_units=Decimal("0"),
+                         reason="STRATEGY_D_ESCALATION_GATE_NOT_SATISFIED_ZERO_PRIOR",
+                         month=month)
+                return
+            elif st["escalation_attempted"]:
+                # SD-3: both tranches already used this month.
+                self.suppressed += 1
+                self.log(d, "SIGNAL_SUPPRESSED", zone=zone, requested_units=Decimal("0"),
+                         reason="STRATEGY_D_MONTHLY_CAPACITY_EXHAUSTED", month=month)
+                return
+            else:
+                # SD-3: a new, independent escalation allocation. Nominal size
+                # fixed at 1.0, additionally capped by remaining Strategy-D
+                # capacity (semantic decision §6) before ordinary funding
+                # capping is applied below.
+                remaining_capacity = self.d_monthly_capacity - st["normal_accepted"]
+                requested = min(self.u_normal, remaining_capacity)
+                tranche = "LARGE_DROP_ESCALATION"
+
+        self.log(d, "PURCHASE_REQUEST", zone=zone, requested_units=requested,
+                 strategy_d_tranche=tranche)
+
+        accepted = min(requested, self.available)      # §12.4 capping (funding only)
+        capped = accepted < requested
+        self.log(d, "BUDGET_VALIDATION", requested_units=requested,
+                 available_units=self.available, accepted_units=accepted, capped=capped,
+                 strategy_d_tranche=tranche)
+
+        if tranche == "NORMAL":
+            st["normal_attempted"] = True
+            st["normal_accepted"] = accepted
+        elif tranche == "DIRECT_LARGE_DROP":
+            st["direct_attempted"] = True
+        else:
+            st["escalation_attempted"] = True
+
+        if accepted == 0:
+            # SD-5: a zero-unit result creates no allocation, no commitment,
+            # no reservation, and consumes no Strategy-D monthly capacity.
+            self.log(d, "NO_ALLOCATION", reason="ZERO_UNITS_AVAILABLE",
+                     strategy_d_tranche=tranche)
+            return
+
+        # §12.1 / §12.2 — reserve immediately, attribute to month/year of
+        # acceptance, identical mechanics to A/B/C.
+        self.available -= accepted
+        self.reserved_outstanding += accepted
+        exec_on = self.obs[i + 1][0] if i + 1 < len(self.obs) else None
+        alloc = {
+            "committed_on": d.isoformat(), "attributed_month": month,
+            "attributed_budget_year": str(d.year),
+            "requested_units": str(requested), "accepted_units": accepted,
+            "capped": capped, "execute_on_or_after": exec_on,
+            "month_end": self.is_final_observation_of_month(i), "zone": zone,
+            "strategy_d_tranche": tranche,
+        }
+        self.allocations.append(alloc)
+        self.pending.append(alloc)
+        self.log(d, "COMMITMENT", attributed_month=month, attributed_budget_year=d.year,
+                 accepted_units=accepted, available_after=self.available,
+                 reserved_outstanding=self.reserved_outstanding,
+                 strategy_d_tranche=tranche)
 
     # ---- outputs ---------------------------------------------------------
     def terminal_state(self):
@@ -461,9 +610,30 @@ class Engine:
             all(int(a["attributed_budget_year"]) in self.funded_years for a in self.allocations))
         chk("INV-6/7/8 unused units carry forward; cash retained; 0% cash return",
             self.available >= 0 and self.granted * self.unit_value - self.cash_deployed >= 0)
-        chk("INV-9 at most one committed allocation per calendar month",
-            len({a["attributed_month"] for a in self.allocations}) == len(self.allocations),
-            f"months={[a['attributed_month'] for a in self.allocations]}")
+        if self.strategy == "D":
+            # Strategy D — EXPERIMENTAL VARIANT — NOT BASELINE. Baseline
+            # Invariant 9 is stated for the Baseline strategies (A/B/C); the
+            # preserved semantic decision (62c5c42) deliberately permits up to
+            # two Strategy-D allocations per month, so it is not applicable
+            # verbatim here. Replaced with the Strategy-D-specific bound the
+            # semantic decision actually fixes, not silently reused.
+            month_counts = {}
+            for a in self.allocations:
+                month_counts[a["attributed_month"]] = month_counts.get(a["attributed_month"], 0) + 1
+            chk("INV-9-D at most two committed Strategy-D allocations per calendar month",
+                all(c <= 2 for c in month_counts.values()),
+                f"counts={month_counts}")
+            by_month = {}
+            for a in self.allocations:
+                by_month.setdefault(a["attributed_month"], []).append(a.get("strategy_d_tranche"))
+            bad = {m: t for m, t in by_month.items()
+                   if len(t) == 2 and sorted(t) != ["LARGE_DROP_ESCALATION", "NORMAL"]}
+            chk("INV-9-D two-allocation months are always NORMAL + escalation, never DIRECT combined",
+                not bad, f"bad={bad}")
+        else:
+            chk("INV-9 at most one committed allocation per calendar month",
+                len({a["attributed_month"] for a in self.allocations}) == len(self.allocations),
+                f"months={[a['attributed_month'] for a in self.allocations]}")
         chk("INV-10 commitment reserves budget immediately",
             all(e["event"] != "COMMITMENT" or Decimal(e["available_after"]) >= 0 for e in self.events))
         chk("INV-11 execution never deducts budget twice",
@@ -501,6 +671,32 @@ class Engine:
             self.granted == self.available + self.reserved_outstanding + self.executed_units)
         chk("ENG-3 no negative balances",
             self.available >= 0 and self.reserved_outstanding >= 0 and self.exposure >= 0)
+
+        if self.strategy == "D":
+            cap_by_month = {}
+            for a in self.allocations:
+                cap_by_month[a["attributed_month"]] = (
+                    cap_by_month.get(a["attributed_month"], Decimal("0")) + a["accepted_units"])
+            cap_detail = {k: str(v) for k, v in cap_by_month.items()}
+            chk("ENG-D1 Strategy D monthly capacity never exceeds 2.0",
+                all(c <= self.d_monthly_capacity for c in cap_by_month.values()),
+                f"capacity_by_month={cap_detail}")
+            chk("ENG-D2 per-month tracking state matches allocation records "
+                "(Normal-tranche accepted amount)",
+                all(self.d_month_state[m]["normal_accepted"] == sum(
+                        a["accepted_units"] for a in self.allocations
+                        if a["attributed_month"] == m and a.get("strategy_d_tranche") == "NORMAL")
+                    for m in self.d_month_state),
+                "cross-check between per-month tracking state and allocation records")
+            chk("ENG-D3 zero-accepted Strategy-D attempts never become allocations",
+                all(a["accepted_units"] > 0 for a in self.allocations))
+            ids = [(a["committed_on"], a.get("strategy_d_tranche")) for a in self.allocations]
+            chk("ENG-D4 Strategy D allocation identities are distinct",
+                len(ids) == len(set(ids)), f"{ids}")
+            chk("ENG-D5 no execution before commitment (independent per-tranche timing, SD-3)",
+                all(a.get("executed_on") is None or a["executed_on"] >= a["committed_on"]
+                    for a in self.allocations))
+
         return r
 
 

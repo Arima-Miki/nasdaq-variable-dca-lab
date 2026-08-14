@@ -1,0 +1,104 @@
+{
+  "classification": [
+    "NON-FORMAL — SIMULATION TRIAL",
+    "ENGINE VALIDATION FIXTURE",
+    "SYNTHETIC",
+    "NON-MARKET DATA",
+    "NON-ECONOMIC",
+    "NON-BASELINE",
+    "NON-PROMOTABLE",
+    "EXPERIMENTAL VARIANT — NOT BASELINE"
+  ],
+  "warning": "SYNTHETIC NON-MARKET DATA. Invented for engine validation of Strategy D (EXPERIMENTAL VARIANT — NOT BASELINE; OWNER-GENERATED POST-RESULT ALTERNATIVE HYPOTHESIS, docs/decisions/simulation_trial_strategy_d_owner_hypothesis.md 5a3f54a, semantics fixed by docs/decisions/simulation_trial_strategy_d_owner_semantic_decision.md 62c5c42). Not an observation of any index, fund or security. MUST NEVER be represented as market evidence, and this run is NOT evidence about Strategy D's economic merit relative to A, B, or C.",
+  "governing_baseline": "v2",
+  "dataset_class": "synthetic",
+  "fixture_id": "D5",
+  "scenario_name": "Zero cap on the Normal tranche",
+  "exposes": "a Normal attempt capped to exactly zero creates no commitment and does not open the escalation gate later the same month (SD-5, and the derived consistency-check consequence in the semantic decision, section 6)",
+  "parameters": {
+    "unit_value_jpy": "10000",
+    "threshold_normal": "-0.10",
+    "threshold_large_drop": "-0.20",
+    "units_normal_zone": "1.0",
+    "units_large_drop_zone": "2.0",
+    "units_strategy_a_monthly": "1.0",
+    "units_month_end_fallback": "0.5",
+    "execution_valuation_rule": "NEXT_OBSERVATION_CLOSE",
+    "execution_valuation_rule_note": "Declared FIXTURE PARAMETER, not a Baseline execution-price determination. P1-1/OD-04 untouched. Satisfies OD-03.",
+    "annual_units": "1.0",
+    "performance_start": "2021-01-04"
+  },
+  "observations": [
+    {
+      "date": "2021-01-04",
+      "close": "100"
+    },
+    {
+      "date": "2021-01-05",
+      "close": "89"
+    },
+    {
+      "date": "2021-01-06",
+      "close": "95"
+    },
+    {
+      "date": "2021-02-01",
+      "close": "88"
+    },
+    {
+      "date": "2021-02-02",
+      "close": "70"
+    },
+    {
+      "date": "2021-02-03",
+      "close": "72"
+    }
+  ],
+  "hand_derived_expectations": {
+    "note": "Hand-reasoned: 2021-01-05 NORMAL fires and consumes the entire 1.0-unit annual budget (accepted=1.0, not capped). No new grant occurs mid-year, so available stays 0 for the rest of the year. 2021-02-01 DD=(88-100)/100=-12% -> NORMAL, first qualifying event of February -> Normal tranche attempts nominal 1.0, but available=0 -> accepted=0 (SD-5: no commitment, no reservation, capacity consumption 0). 2021-02-02 DD=-30% -> LARGE_DROP; the escalation gate requires a POSITIVE prior Normal acceptance (semantic decision section 6) which was not satisfied (accepted was exactly 0) -> suppressed under STRATEGY_D_ESCALATION_GATE_NOT_SATISFIED_ZERO_PRIOR, not treated as a direct-Large-drop case either since a Normal-zone observation occurred first that month.",
+    "per_strategy": {
+      "D": {
+        "allocations": [
+          {
+            "committed_on": "2021-01-05",
+            "attributed_month": "2021-01",
+            "attributed_budget_year": "2021",
+            "requested_units": "1.0",
+            "accepted_units": "1.0",
+            "capped": false,
+            "execute_on_or_after": "2021-01-06",
+            "month_end": false,
+            "zone": "NORMAL",
+            "strategy_d_tranche": "NORMAL",
+            "executed_on": "2021-01-06",
+            "execution_close": "95",
+            "amount_jpy": "10000.0",
+            "exposure_units_acquired": "105.2631578947368421052631578947368421053"
+          }
+        ],
+        "terminal_state": {
+          "strategy": "D",
+          "reference_high": "100",
+          "final_dd": "-0.28",
+          "final_zone": "LARGE_DROP",
+          "budget_units_granted": "1.0",
+          "budget_units_available": "0.0",
+          "budget_units_reserved_outstanding": "0.0",
+          "budget_units_executed": "1.0",
+          "cash_granted_jpy": "10000.0",
+          "cash_deployed_jpy": "10000.0",
+          "cash_remaining_jpy": "0.0",
+          "exposure_units_held": "105.2631578947368421052631578947368421053",
+          "allocations_committed": 1,
+          "signals_suppressed_monthly_exclusivity": 2
+        },
+        "suppressed_count": 2,
+        "suppression_reasons": [
+          "ZERO_UNITS_AVAILABLE",
+          "STRATEGY_D_ESCALATION_GATE_NOT_SATISFIED_ZERO_PRIOR",
+          "STRATEGY_D_ESCALATION_GATE_NOT_SATISFIED_ZERO_PRIOR"
+        ]
+      }
+    }
+  }
+}

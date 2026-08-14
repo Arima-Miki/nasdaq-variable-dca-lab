@@ -1,0 +1,94 @@
+{
+  "classification": [
+    "NON-FORMAL — SIMULATION TRIAL",
+    "ENGINE VALIDATION FIXTURE",
+    "SYNTHETIC",
+    "NON-MARKET DATA",
+    "NON-ECONOMIC",
+    "NON-BASELINE",
+    "NON-PROMOTABLE",
+    "EXPERIMENTAL VARIANT — NOT BASELINE"
+  ],
+  "warning": "SYNTHETIC NON-MARKET DATA. Invented for engine validation of Strategy D (EXPERIMENTAL VARIANT — NOT BASELINE; OWNER-GENERATED POST-RESULT ALTERNATIVE HYPOTHESIS, docs/decisions/simulation_trial_strategy_d_owner_hypothesis.md 5a3f54a, semantics fixed by docs/decisions/simulation_trial_strategy_d_owner_semantic_decision.md 62c5c42). Not an observation of any index, fund or security. MUST NEVER be represented as market evidence, and this run is NOT evidence about Strategy D's economic merit relative to A, B, or C.",
+  "governing_baseline": "v2",
+  "dataset_class": "synthetic",
+  "fixture_id": "D4",
+  "scenario_name": "Positive partial cap on the Normal tranche",
+  "exposes": "Normal nominal 1.0 capped to a positive partial amount by insufficient funding; the later escalation tranche's nominal size remains 1.0 (not resized), independently capped by ordinary funding rules (SD-4)",
+  "parameters": {
+    "unit_value_jpy": "10000",
+    "threshold_normal": "-0.10",
+    "threshold_large_drop": "-0.20",
+    "units_normal_zone": "1.0",
+    "units_large_drop_zone": "2.0",
+    "units_strategy_a_monthly": "1.0",
+    "units_month_end_fallback": "0.5",
+    "execution_valuation_rule": "NEXT_OBSERVATION_CLOSE",
+    "execution_valuation_rule_note": "Declared FIXTURE PARAMETER, not a Baseline execution-price determination. P1-1/OD-04 untouched. Satisfies OD-03.",
+    "annual_units": "0.5",
+    "performance_start": "2021-01-04"
+  },
+  "observations": [
+    {
+      "date": "2021-01-04",
+      "close": "100"
+    },
+    {
+      "date": "2021-01-05",
+      "close": "89"
+    },
+    {
+      "date": "2021-01-06",
+      "close": "95"
+    },
+    {
+      "date": "2021-01-07",
+      "close": "75"
+    }
+  ],
+  "hand_derived_expectations": {
+    "note": "Hand-reasoned: annual budget is only 0.5 units for the year. 01-05 NORMAL fires nominal 1.0, but only 0.5 is available -> accepted=0.5 (capped=true), capacity consumed=0.5 (actual accepted amount, per the SD-4/SD-5 consistency check — not the nominal 1.0). 01-07 LARGE_DROP: the prior Normal acceptance was positive (0.5 > 0) so the escalation gate IS satisfied and the tranche fires; its nominal size remains 1.0 (not resized to 0.5, and not the remaining capacity of 1.5) — this is exactly what proves the nominal size is independent of the first tranche's capped outcome. It is then independently capped against funding: available is now exactly 0 (0.5-0.5), so accepted=0. This is a zero-unit OUTCOME of ordinary funding capping on an eligible, fired tranche — distinct from D5, where the tranche itself never becomes eligible to fire.",
+    "per_strategy": {
+      "D": {
+        "allocations": [
+          {
+            "committed_on": "2021-01-05",
+            "attributed_month": "2021-01",
+            "attributed_budget_year": "2021",
+            "requested_units": "1.0",
+            "accepted_units": "0.5",
+            "capped": true,
+            "execute_on_or_after": "2021-01-06",
+            "month_end": false,
+            "zone": "NORMAL",
+            "strategy_d_tranche": "NORMAL",
+            "executed_on": "2021-01-06",
+            "execution_close": "95",
+            "amount_jpy": "5000.0",
+            "exposure_units_acquired": "52.63157894736842105263157894736842105263"
+          }
+        ],
+        "terminal_state": {
+          "strategy": "D",
+          "reference_high": "100",
+          "final_dd": "-0.25",
+          "final_zone": "LARGE_DROP",
+          "budget_units_granted": "0.5",
+          "budget_units_available": "0.0",
+          "budget_units_reserved_outstanding": "0.0",
+          "budget_units_executed": "0.5",
+          "cash_granted_jpy": "5000.0",
+          "cash_deployed_jpy": "5000.0",
+          "cash_remaining_jpy": "0.0",
+          "exposure_units_held": "52.63157894736842105263157894736842105263",
+          "allocations_committed": 1,
+          "signals_suppressed_monthly_exclusivity": 0
+        },
+        "suppressed_count": 0,
+        "suppression_reasons": [
+          "ZERO_UNITS_AVAILABLE"
+        ]
+      }
+    }
+  }
+}

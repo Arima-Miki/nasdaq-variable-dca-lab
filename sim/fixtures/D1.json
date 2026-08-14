@@ -1,0 +1,94 @@
+{
+  "classification": [
+    "NON-FORMAL — SIMULATION TRIAL",
+    "ENGINE VALIDATION FIXTURE",
+    "SYNTHETIC",
+    "NON-MARKET DATA",
+    "NON-ECONOMIC",
+    "NON-BASELINE",
+    "NON-PROMOTABLE",
+    "EXPERIMENTAL VARIANT — NOT BASELINE"
+  ],
+  "warning": "SYNTHETIC NON-MARKET DATA. Invented for engine validation of Strategy D (EXPERIMENTAL VARIANT — NOT BASELINE; OWNER-GENERATED POST-RESULT ALTERNATIVE HYPOTHESIS, docs/decisions/simulation_trial_strategy_d_owner_hypothesis.md 5a3f54a, semantics fixed by docs/decisions/simulation_trial_strategy_d_owner_semantic_decision.md 62c5c42). Not an observation of any index, fund or security. MUST NEVER be represented as market evidence, and this run is NOT evidence about Strategy D's economic merit relative to A, B, or C.",
+  "governing_baseline": "v2",
+  "dataset_class": "synthetic",
+  "fixture_id": "D1",
+  "scenario_name": "Normal tranche only, then repeated Normal suppressed",
+  "exposes": "first Normal trigger fires 1.0; a later same-month Normal-zone observation creates no second allocation (SD-2)",
+  "parameters": {
+    "unit_value_jpy": "10000",
+    "threshold_normal": "-0.10",
+    "threshold_large_drop": "-0.20",
+    "units_normal_zone": "1.0",
+    "units_large_drop_zone": "2.0",
+    "units_strategy_a_monthly": "1.0",
+    "units_month_end_fallback": "0.5",
+    "execution_valuation_rule": "NEXT_OBSERVATION_CLOSE",
+    "execution_valuation_rule_note": "Declared FIXTURE PARAMETER, not a Baseline execution-price determination. P1-1/OD-04 untouched. Satisfies OD-03.",
+    "annual_units": "12.0",
+    "performance_start": "2021-01-04"
+  },
+  "observations": [
+    {
+      "date": "2021-01-04",
+      "close": "100"
+    },
+    {
+      "date": "2021-01-05",
+      "close": "89"
+    },
+    {
+      "date": "2021-01-06",
+      "close": "95"
+    },
+    {
+      "date": "2021-01-07",
+      "close": "87"
+    }
+  ],
+  "hand_derived_expectations": {
+    "note": "Hand-reasoned: 2021-01-05 DD=(89-100)/100=-11% -> NORMAL, first qualifying event of the month -> Normal tranche fires, nominal 1.0, budget ample -> accepted 1.0. 2021-01-07 DD=(87-100)/100=-13% -> still NORMAL, but the Normal tranche already fired this month -> SD-2 suppression, no second allocation.",
+    "per_strategy": {
+      "D": {
+        "allocations": [
+          {
+            "committed_on": "2021-01-05",
+            "attributed_month": "2021-01",
+            "attributed_budget_year": "2021",
+            "requested_units": "1.0",
+            "accepted_units": "1.0",
+            "capped": false,
+            "execute_on_or_after": "2021-01-06",
+            "month_end": false,
+            "zone": "NORMAL",
+            "strategy_d_tranche": "NORMAL",
+            "executed_on": "2021-01-06",
+            "execution_close": "95",
+            "amount_jpy": "10000.0",
+            "exposure_units_acquired": "105.2631578947368421052631578947368421053"
+          }
+        ],
+        "terminal_state": {
+          "strategy": "D",
+          "reference_high": "100",
+          "final_dd": "-0.13",
+          "final_zone": "NORMAL",
+          "budget_units_granted": "12.0",
+          "budget_units_available": "11.0",
+          "budget_units_reserved_outstanding": "0.0",
+          "budget_units_executed": "1.0",
+          "cash_granted_jpy": "120000.0",
+          "cash_deployed_jpy": "10000.0",
+          "cash_remaining_jpy": "110000.0",
+          "exposure_units_held": "105.2631578947368421052631578947368421053",
+          "allocations_committed": 1,
+          "signals_suppressed_monthly_exclusivity": 1
+        },
+        "suppressed_count": 1,
+        "suppression_reasons": [
+          "STRATEGY_D_REPEATED_NORMAL_NO_ADDITIONAL_ALLOCATION"
+        ]
+      }
+    }
+  }
+}

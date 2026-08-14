@@ -1,0 +1,114 @@
+{
+  "classification": [
+    "NON-FORMAL — SIMULATION TRIAL",
+    "ENGINE VALIDATION FIXTURE",
+    "SYNTHETIC",
+    "NON-MARKET DATA",
+    "NON-ECONOMIC",
+    "NON-BASELINE",
+    "NON-PROMOTABLE",
+    "EXPERIMENTAL VARIANT — NOT BASELINE"
+  ],
+  "warning": "SYNTHETIC NON-MARKET DATA. Invented for engine validation of Strategy D (EXPERIMENTAL VARIANT — NOT BASELINE; OWNER-GENERATED POST-RESULT ALTERNATIVE HYPOTHESIS, docs/decisions/simulation_trial_strategy_d_owner_hypothesis.md 5a3f54a, semantics fixed by docs/decisions/simulation_trial_strategy_d_owner_semantic_decision.md 62c5c42). Not an observation of any index, fund or security. MUST NEVER be represented as market evidence, and this run is NOT evidence about Strategy D's economic merit relative to A, B, or C.",
+  "governing_baseline": "v2",
+  "dataset_class": "synthetic",
+  "fixture_id": "D6",
+  "scenario_name": "Month boundary — commitment/execution split, independent next-month capacity",
+  "exposes": "a Normal commitment near month-end executes in the following month; the new calendar month's own Strategy-D capacity is unaffected by the prior month's still-settling execution (SD-7)",
+  "parameters": {
+    "unit_value_jpy": "10000",
+    "threshold_normal": "-0.10",
+    "threshold_large_drop": "-0.20",
+    "units_normal_zone": "1.0",
+    "units_large_drop_zone": "2.0",
+    "units_strategy_a_monthly": "1.0",
+    "units_month_end_fallback": "0.5",
+    "execution_valuation_rule": "NEXT_OBSERVATION_CLOSE",
+    "execution_valuation_rule_note": "Declared FIXTURE PARAMETER, not a Baseline execution-price determination. P1-1/OD-04 untouched. Satisfies OD-03.",
+    "annual_units": "12.0",
+    "performance_start": "2021-01-29"
+  },
+  "observations": [
+    {
+      "date": "2021-01-29",
+      "close": "100"
+    },
+    {
+      "date": "2021-01-30",
+      "close": "89"
+    },
+    {
+      "date": "2021-02-01",
+      "close": "95"
+    },
+    {
+      "date": "2021-02-02",
+      "close": "88"
+    },
+    {
+      "date": "2021-02-03",
+      "close": "90"
+    }
+  ],
+  "hand_derived_expectations": {
+    "note": "Hand-reasoned: 2021-01-30 DD=-11% -> NORMAL, fires (attributed_month 2021-01), executes on 2021-02-01 (next observation). 2021-02-01 itself is DD=-5% -> HIGH, no new Feb signal on that day. 2021-02-02 DD=(88-100)/100=-12% -> NORMAL, the FIRST qualifying event of February -> Feb's Strategy-D capacity is untouched by January's pending/now-executed allocation -> a fresh Normal tranche fires (attributed_month 2021-02), executes 2021-02-03. Two independent allocations, one per month, capacity correctly reset.",
+    "per_strategy": {
+      "D": {
+        "allocations": [
+          {
+            "committed_on": "2021-01-30",
+            "attributed_month": "2021-01",
+            "attributed_budget_year": "2021",
+            "requested_units": "1.0",
+            "accepted_units": "1.0",
+            "capped": false,
+            "execute_on_or_after": "2021-02-01",
+            "month_end": true,
+            "zone": "NORMAL",
+            "strategy_d_tranche": "NORMAL",
+            "executed_on": "2021-02-01",
+            "execution_close": "95",
+            "amount_jpy": "10000.0",
+            "exposure_units_acquired": "105.2631578947368421052631578947368421053"
+          },
+          {
+            "committed_on": "2021-02-02",
+            "attributed_month": "2021-02",
+            "attributed_budget_year": "2021",
+            "requested_units": "1.0",
+            "accepted_units": "1.0",
+            "capped": false,
+            "execute_on_or_after": "2021-02-03",
+            "month_end": false,
+            "zone": "NORMAL",
+            "strategy_d_tranche": "NORMAL",
+            "executed_on": "2021-02-03",
+            "execution_close": "90",
+            "amount_jpy": "10000.0",
+            "exposure_units_acquired": "111.1111111111111111111111111111111111111"
+          }
+        ],
+        "terminal_state": {
+          "strategy": "D",
+          "reference_high": "100",
+          "final_dd": "-0.1",
+          "final_zone": "NORMAL",
+          "budget_units_granted": "12.0",
+          "budget_units_available": "10.0",
+          "budget_units_reserved_outstanding": "0.0",
+          "budget_units_executed": "2.0",
+          "cash_granted_jpy": "120000.0",
+          "cash_deployed_jpy": "20000.0",
+          "cash_remaining_jpy": "100000.0",
+          "exposure_units_held": "216.3742690058479532163742690058479532164",
+          "allocations_committed": 2,
+          "signals_suppressed_monthly_exclusivity": 1
+        },
+        "suppressed_count": 1,
+        "suppression_reasons": [
+          "STRATEGY_D_REPEATED_NORMAL_NO_ADDITIONAL_ALLOCATION"
+        ]
+      }
+    }
+  }
+}
